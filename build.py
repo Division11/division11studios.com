@@ -125,7 +125,7 @@ T = {
     "privacy_title": "Privacy", "privacy_desc": "Privacy information for Division 11 Studios apps and website.",
     "privacy_apps_h2": "App privacy policies",
     "privacy_site_h2": "This website",
-    "privacy_site_p": "This website is a static site hosted on GitHub Pages. We do not use cookies, analytics or forms, and we do not collect personal information through it. Your language and theme choice is stored only in your browser. Our hosting provider may keep standard server logs (such as IP address and browser type) for security. Fonts are loaded from Google Fonts.",
+    "privacy_site_p": "This website doesn’t use cookies or analytics and doesn’t collect personal information.",
     "privacy_email_p": "If you email us, we use your message and address only to reply.",
     "privacy_contact_h2": "Contact",
     # 404
@@ -217,7 +217,7 @@ T = {
     "privacy_title": "الخصوصية", "privacy_desc": "معلومات الخصوصية لتطبيقات وموقع ديفيجن 11 ستوديوز.",
     "privacy_apps_h2": "سياسات خصوصية التطبيقات",
     "privacy_site_h2": "هذا الموقع",
-    "privacy_site_p": "هذا موقع ثابت مستضاف على GitHub Pages. لا نستخدم ملفات تعريف الارتباط أو أدوات التحليل أو النماذج، ولا نجمع أي معلومات شخصية من خلاله. يُحفظ اختيارك للغة والمظهر في متصفحك فقط. قد يحتفظ مزوّد الاستضافة بسجلات خادم اعتيادية (مثل عنوان IP ونوع المتصفح) لأغراض الأمان. تُحمَّل الخطوط من Google Fonts.",
+    "privacy_site_p": "لا يستخدم هذا الموقع ملفات تعريف الارتباط أو أدوات التحليل، ولا يجمع أي معلومات شخصية.",
     "privacy_email_p": "إذا راسلتنا عبر البريد الإلكتروني، نستخدم رسالتك وعنوانك للرد عليك فقط.",
     "privacy_contact_h2": "التواصل",
     # 404
@@ -663,7 +663,7 @@ def privacy(lang):
     items = "".join(f'<a class="res-app" href="{L(lang, "/" + a["slug"] + "/privacy/")}">{icon_html(a)}<div><strong>{a["name"]}</strong><br><span class="muted small">{t(lang, "privacy_policy")} {t(lang, "arrow")}</span></div></a>' for a in APPS)
     legal_page(lang, "/privacy/", t(lang, "privacy_title"), t(lang, "privacy_desc"), t(lang, "legal_eyebrow"), t(lang, "last_updated"),
                f"""<h2 class="first">{t(lang, 'privacy_apps_h2')}</h2><div class="policy-list">{items}</div>
-<h2>{t(lang, 'privacy_site_h2')}</h2><p>{t(lang, 'privacy_site_p')}</p><p>{t(lang, 'privacy_email_p')}</p>
+<h2>{t(lang, 'privacy_site_h2')}</h2><p>{t(lang, 'privacy_site_p')}</p>
 <h2>{t(lang, 'privacy_contact_h2')}</h2><p>{mail(CO['support'])}</p>""")
 
 def notfound():
