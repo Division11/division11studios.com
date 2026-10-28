@@ -261,3 +261,20 @@ details.faq[open]{border-color:color-mix(in srgb,var(--brand) 40%,var(--line))}
 .policy-list .res-app:hover{border-color:var(--brand)}
 .note{background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--brand);border-radius:12px;padding:12px 16px;color:var(--muted);font-size:.92rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* App detail page — same hero language as the rest of the site, in the app's colours */
+.app-hero{position:relative;overflow:hidden}
+.app-hero::before{content:"";position:absolute;inset:0;opacity:.12;background:url(/assets/D11_Pattern_Black_Background.webp) center/cover no-repeat}
+.app-hero::after{content:"";position:absolute;width:620px;height:620px;inset-inline-end:-200px;top:-280px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--a) 40%,transparent),transparent 65%)}
+.app-hero-inner{position:relative;z-index:1;padding:88px 24px 112px;align-items:flex-start}
+.app-hero .appicon.xl{width:140px;height:140px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 20px 40px rgba(0,0,0,.35)}
+.app-tagline{color:var(--a);font-weight:600;font-size:1.15rem;margin:0 0 14px}
+.app-hero .lead{color:rgba(255,255,255,.82);max-width:640px}
+.facts.raised{box-shadow:0 18px 40px rgba(10,6,48,.12)}
+.app-feats .badge.num{color:var(--b);background:var(--a)}
+.app-links{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.app-links .res-app{margin:0;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--surface);transition:border-color .2s ease,transform .2s ease}
+.app-links .res-app:hover{border-color:var(--brand);transform:translateY(-2px)}
+.app-links .badge{margin:0;flex:none;width:42px;height:42px}
+@media (max-width:800px){.app-links{grid-template-columns:1fr}}
+@media (max-width:600px){.app-hero-inner{padding:64px 24px 96px}.app-hero .appicon.xl{width:110px;height:110px}}

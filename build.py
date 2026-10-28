@@ -99,7 +99,7 @@ T = {
     "faq_h2": "Common questions",
     "faq": [
         ("I bought “Remove Ads” but still see ads.", "Open the app’s settings and tap Restore purchases while signed in with the same Apple ID or Google account you used to buy it. If that doesn’t work, email us with your order receipt."),
-        ("How do I get a refund?", "Purchases are processed by Apple or Google. Request a refund at reportaproblem.apple.com (App Store) or through your Google Play order history."),
+        ("How do I get a refund?", "Purchases are processed by Apple or Google. Request a refund at <a href='https://reportaproblem.apple.com'>reportaproblem.apple.com</a> (App Store) or through your Google Play order history."),
         ("Where is my data stored? Can I delete it?", "Scorey game history and ArtNest artwork are stored only on your device. Delete them in the app, clear the app’s data, or uninstall the app. See each app’s privacy policy for details."),
         ("Is ArtNest safe for children?", "ArtNest needs no account and places external links behind a parental gate."),
     ],
@@ -191,7 +191,7 @@ T = {
     "faq_h2": "أسئلة شائعة",
     "faq": [
         ("اشتريت «إزالة الإعلانات» وما زالت الإعلانات تظهر.", "افتح إعدادات التطبيق واضغط «استعادة المشتريات» وأنت مسجّل بنفس حساب Apple أو Google الذي استخدمته للشراء. إذا لم ينجح ذلك، راسلنا مع إيصال الشراء."),
-        ("كيف أسترد المبلغ؟", "تتم عمليات الشراء عبر Apple أو Google. اطلب الاسترداد من reportaproblem.apple.com (لمتجر App Store) أو من سجل الطلبات في Google Play."),
+        ("كيف أسترد المبلغ؟", "تتم عمليات الشراء عبر Apple أو Google. اطلب الاسترداد من <a href='https://reportaproblem.apple.com'>reportaproblem.apple.com</a> (لمتجر App Store) أو من سجل الطلبات في Google Play."),
         ("أين تُحفظ بياناتي؟ وهل يمكنني حذفها؟", "يُحفظ سجل ألعاب Scorey ورسومات ArtNest على جهازك فقط. يمكنك حذفها من داخل التطبيق أو بمسح بيانات التطبيق أو بحذفه. راجع سياسة الخصوصية لكل تطبيق للتفاصيل."),
         ("هل تطبيق ArtNest آمن للأطفال؟", "لا يحتاج ArtNest إلى حساب، والروابط الخارجية فيه محمية ببوابة أبوية."),
     ],
@@ -379,7 +379,17 @@ def logos():
 
 PAGES = []  # (lang, path) for the sitemap
 
+EXTERNAL = re.compile(r"""<a ([^>]*?)href=["'](https?://(?!www\.division11studios\.com)[^"']+)["']([^>]*)>""")
+
+def external_new_tab(html):
+    def fix(m):
+        attrs = re.sub(r'\s*(rel|target)="[^"]*"', "", m.group(1) + m.group(3)).strip()
+        attrs = (" " + attrs) if attrs else ""
+        return f'<a href="{m.group(2)}" target="_blank" rel="noopener noreferrer"{attrs}>'
+    return EXTERNAL.sub(fix, html)
+
 def write(lang, path, html):
+    html = external_new_tab(html)
     rel = L(lang, path).strip("/")
     out = os.path.join(OUT, rel, "index.html") if path != "/404" else os.path.join(OUT, "404.html")
     os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -587,21 +597,27 @@ def app_page(lang, a):
     <div>
       <p class="eyebrow">{at(a, lang, 'category')}</p>
       <h1>{a['name']}</h1>
-      <p class="lead">{at(a, lang, 'tagline')}</p>
+      <p class="app-tagline">{at(a, lang, 'tagline')}</p>
+      <p class="lead">{at(a, lang, 'summary')}</p>
       {store_buttons(a, lang)}
     </div>
   </div>
 </section>
-<section class="section"><div class="wrap narrow"><p class="lead dark big">{at(a, lang, 'summary')}</p></div></section>
-<section class="section tint" style="--a:{a['accent']};--b:{a['bg']}"><div class="wrap"><div class="section-head"><h2>{t(lang, 'features')}</h2></div><div class="three app-feats">{feats}</div></div></section>
-<section class="section"><div class="wrap">
-  <dl class="facts">
+<section class="section pull-up" style="--a:{a['accent']};--b:{a['bg']}"><div class="wrap">
+  <dl class="facts raised">
     <div><dt>{t(lang, 'f_platforms')}</dt><dd>{at(a, lang, 'platforms')}</dd></div>
     <div><dt>{t(lang, 'f_price')}</dt><dd>{at(a, lang, 'pricing')}</dd></div>
     <div><dt>{t(lang, 'f_age')}</dt><dd>{ltr(a['age'])}</dd></div>
     <div><dt>{t(lang, 'f_dev')}</dt><dd>{t(lang, 'brand')}</dd></div>
   </dl>
-  <p class="small links"><a href="{L(lang, '/' + a['slug'] + '/privacy/')}">{a['name']} {t(lang, 'policy_suffix')}</a><a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a><a href="{L(lang, '/support/')}">{t(lang, 'get_support')}</a></p>
+</div></section>
+<section class="section" style="--a:{a['accent']};--b:{a['bg']}"><div class="wrap"><div class="section-head"><p class="eyebrow">{a['name']}</p><h2>{t(lang, 'features')}</h2></div><div class="three app-feats">{feats}</div></div></section>
+<section class="section tint"><div class="wrap">
+  <div class="app-links">
+    <a class="res-app" href="{L(lang, '/' + a['slug'] + '/privacy/')}"><span class="badge">{ICONS['lock']}</span><div><strong>{t(lang, 'privacy_policy')}</strong><br><span class="muted small">{a['name']} {t(lang, 'arrow')}</span></div></a>
+    <a class="res-app" href="{L(lang, '/support/')}"><span class="badge">{ICONS['mail']}</span><div><strong>{t(lang, 'get_support')}</strong><br><span class="muted small">{ltr(CO['support'])}</span></div></a>
+    <a class="res-app" href="{L(lang, '/terms/')}"><span class="badge">{ICONS['brief']}</span><div><strong>{t(lang, 'terms_of_use')}</strong><br><span class="muted small">{t(lang, 'brand')}</span></div></a>
+  </div>
 </div></section>"""
     page(lang, f"/{a['slug']}/", a["name"], f"{a['name']} — {at(a, lang, 'tagline')}. {at(a, lang, 'summary')}", body, active="/apps/", hero=True)
 
@@ -718,7 +734,7 @@ def statics():
     for f in ["D11_Full_Logo_Color_On_Light.svg", "D11_Full_Logo_Color_On_Dark.svg",
               "D11_Pattern_Black_Background.webp", "apple-touch-icon.png"]:
         shutil.copy(os.path.join(B, f), os.path.join(a, f))
-    shutil.copy(os.path.join(B, "D11_Logomark_Blue_White_Primary.svg"), os.path.join(a, "favicon.svg"))
+    shutil.copy(os.path.join(B, "favicon.svg"), os.path.join(a, "favicon.svg"))
     shutil.copy(os.path.join(B, "favicon.ico"), os.path.join(OUT, "favicon.ico"))
     for f in os.listdir(os.path.join(B, "apps")):
         shutil.copy(os.path.join(B, "apps", f), os.path.join(a, "apps", f))
