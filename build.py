@@ -19,6 +19,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "_site")
 SITE = "https://www.division11studios.com"
 UPDATED = "29 October 2026"
+FAV_VER = hashlib.sha1(open(os.path.join(ROOT, "brand", "favicon.svg"), "rb").read()).hexdigest()[:8]
 CSS_VER = hashlib.sha1(open(os.path.join(ROOT, "site.css"), "rb").read()).hexdigest()[:10]
 
 LANGS = [
@@ -435,8 +436,8 @@ def page(lang, path, title, desc, body, active=None, hero=False):
 <meta property="og:image" content="{SITE}/assets/apple-touch-icon.png">
 <meta property="og:locale" content="{'ar_KW' if lang == 'ar' else 'en_US'}">
 <meta name="theme-color" content="#0A0630">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico?v={FAV_VER}" sizes="32x32">
+<link rel="icon" href="/assets/favicon-{FAV_VER}.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -734,7 +735,7 @@ def statics():
     for f in ["D11_Full_Logo_Color_On_Light.svg", "D11_Full_Logo_Color_On_Dark.svg",
               "D11_Pattern_Black_Background.webp", "apple-touch-icon.png"]:
         shutil.copy(os.path.join(B, f), os.path.join(a, f))
-    shutil.copy(os.path.join(B, "favicon.svg"), os.path.join(a, "favicon.svg"))
+    shutil.copy(os.path.join(B, "favicon.svg"), os.path.join(a, f"favicon-{FAV_VER}.svg"))
     shutil.copy(os.path.join(B, "favicon.ico"), os.path.join(OUT, "favicon.ico"))
     for f in os.listdir(os.path.join(B, "apps")):
         shutil.copy(os.path.join(B, "apps", f), os.path.join(a, "apps", f))
