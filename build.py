@@ -58,13 +58,13 @@ T = {
     "home_desc": "Division 11 Studios is an independent mobile app and game studio in Kuwait, makers of Scorey and ArtNest.",
     "hero_eyebrow": "Independent app studio · Kuwait",
     "hero_h1": "We design and build mobile apps and games people actually use.",
-    "hero_lead": "Division 11 Studios develops and publishes apps for iPhone, iPad and Android — from everyday utilities to creative tools for families — and builds custom software and websites for clients.",
+    "hero_lead": "Division 11 Studios designs, develops and publishes apps and games — from everyday utilities to creative tools for families — and builds custom software and websites for clients.",
     "cta_apps": "See our apps", "cta_about": "About the studio",
-    "apps_eyebrow": "Published apps", "apps_h2": "Available now on the App Store and Google Play",
+    "apps_eyebrow": "Published apps", "apps_h2": "Available to download now",
     "what_eyebrow": "What we do", "what_h2": "Software design and development",
     "what": [
-        ("Mobile apps", "Apps for iOS and Android built with Flutter, from first prototype to store release, updates and support."),
-        ("Games & interactive", "Casual and creative games built in Unity, with attention to performance, accessibility and family-safe design."),
+        ("Apps", "Apps for phones, tablets and beyond, from first prototype to release, updates and support."),
+        ("Games & interactive", "Casual and creative games, with attention to performance, accessibility and family-safe design."),
         ("Websites & maintenance", "Website design, development and ongoing software maintenance for businesses in Kuwait and the region."),
     ],
     "contact_eyebrow": "Get in touch", "contact_h2": "Have a question or a project in mind?",
@@ -72,9 +72,9 @@ T = {
     "contact_link": "Support & contact",
     "office": "Office",
     # apps
-    "apps_title": "Apps", "apps_desc": "Apps published by Division 11 Studios for iOS and Android.",
+    "apps_title": "Apps", "apps_desc": "Apps and games published by Division 11 Studios.",
     "apps_head_eyebrow": "Our apps", "apps_head_h1": "Apps by Division 11 Studios",
-    "apps_head_lead": "Everything we publish on the App Store and Google Play.",
+    "apps_head_lead": "Every app and game we publish.",
     "rated": "Rated", "details": "Details", "privacy_policy": "Privacy policy", "support": "Support",
     "more_coming": "More titles are in development, including a multiplayer trivia game.",
     "features": "Features", "f_platforms": "Platforms", "f_price": "Price", "f_age": "Age rating", "f_dev": "Developer",
@@ -82,8 +82,8 @@ T = {
     # about
     "about_title": "About", "about_desc": "About Division 11 Studios, an independent software studio in Kuwait City.",
     "about_eyebrow": "About", "about_h1": "About Division 11 Studios",
-    "about_lead": "Division 11 Studios is an independent software studio based in Kuwait City. We design, build and publish mobile apps and games for iPhone, iPad and Android, and we develop custom software and websites for clients.",
-    "about_p": "The studio was founded in 2026. Our apps are built with Flutter and Unity and released on both the Apple App Store and Google Play. Our first titles are {scorey}, a scorekeeper for traditional and modern card games, and {artnest}, a creative coloring and drawing app for the whole family.",
+    "about_lead": "Division 11 Studios is an independent software studio based in Kuwait City. We design, build and publish apps and games, and we develop custom software and websites for clients.",
+    "about_p": "The studio was founded in 2026. We pick the tools and platforms that fit each project, and publish wherever our users are. Our first titles are {scorey}, a scorekeeper for traditional and modern card games, and {artnest}, a creative coloring and drawing app for the whole family.",
     "values_h2": "What we care about",
     "values": [
         ("Fast and reliable", "Apps that open quickly, work offline where they can and stay out of your way."),
@@ -150,13 +150,13 @@ T = {
     "home_desc": "ديفيجن 11 ستوديوز استوديو مستقل لتطوير تطبيقات وألعاب الأجهزة المحمولة في الكويت، ومطوّر تطبيقي Scorey وArtNest.",
     "hero_eyebrow": "استوديو تطبيقات مستقل · الكويت",
     "hero_h1": "نصمم ونطوّر تطبيقات وألعاب يستخدمها الناس فعلاً.",
-    "hero_lead": "يطوّر استوديو ديفيجن 11 وينشر تطبيقات لأجهزة iPhone وiPad وAndroid — من أدوات الاستخدام اليومي إلى تطبيقات إبداعية للعائلة — كما ينفّذ برمجيات ومواقع إلكترونية حسب الطلب للعملاء.",
+    "hero_lead": "يصمم استوديو ديفيجن 11 ويطوّر وينشر تطبيقات وألعاباً — من أدوات الاستخدام اليومي إلى تطبيقات إبداعية للعائلة — كما ينفّذ برمجيات ومواقع إلكترونية حسب الطلب للعملاء.",
     "cta_apps": "تطبيقاتنا", "cta_about": "عن الاستوديو",
-    "apps_eyebrow": "تطبيقات منشورة", "apps_h2": "متوفرة الآن على App Store وGoogle Play",
+    "apps_eyebrow": "تطبيقات منشورة", "apps_h2": "متوفرة للتنزيل الآن",
     "what_eyebrow": "ماذا نقدّم", "what_h2": "تصميم البرمجيات وتطويرها",
     "what": [
-        ("تطبيقات الجوال", "تطبيقات iOS وAndroid مبنية بتقنية Flutter، من النموذج الأولي حتى النشر في المتاجر والتحديثات والدعم."),
-        ("ألعاب وتجارب تفاعلية", "ألعاب خفيفة وإبداعية مبنية بمحرك Unity، مع اهتمام بالأداء وسهولة الاستخدام وملاءمتها للعائلة."),
+        ("التطبيقات", "تطبيقات للهواتف والأجهزة اللوحية وغيرها، من النموذج الأولي حتى الإطلاق والتحديثات والدعم."),
+        ("ألعاب وتجارب تفاعلية", "ألعاب خفيفة وإبداعية، مع اهتمام بالأداء وسهولة الاستخدام وملاءمتها للعائلة."),
         ("المواقع الإلكترونية والصيانة", "تصميم المواقع وتطويرها وصيانة البرمجيات بشكل مستمر للشركات في الكويت والمنطقة."),
     ],
     "contact_eyebrow": "تواصل معنا", "contact_h2": "لديك سؤال أو مشروع؟",
@@ -164,9 +164,9 @@ T = {
     "contact_link": "الدعم والتواصل",
     "office": "المكتب",
     # apps
-    "apps_title": "التطبيقات", "apps_desc": "تطبيقات ديفيجن 11 ستوديوز لأجهزة iOS وAndroid.",
+    "apps_title": "التطبيقات", "apps_desc": "التطبيقات والألعاب التي تنشرها ديفيجن 11 ستوديوز.",
     "apps_head_eyebrow": "تطبيقاتنا", "apps_head_h1": "تطبيقات ديفيجن 11 ستوديوز",
-    "apps_head_lead": "كل ما ننشره على App Store وGoogle Play.",
+    "apps_head_lead": "كل التطبيقات والألعاب التي ننشرها.",
     "rated": "التصنيف العمري", "details": "التفاصيل", "privacy_policy": "سياسة الخصوصية", "support": "الدعم",
     "more_coming": "المزيد من التطبيقات قيد التطوير، منها لعبة أسئلة جماعية.",
     "features": "المزايا", "f_platforms": "المنصات", "f_price": "السعر", "f_age": "التصنيف العمري", "f_dev": "المطوّر",
@@ -174,8 +174,8 @@ T = {
     # about
     "about_title": "من نحن", "about_desc": "تعرّف على ديفيجن 11 ستوديوز، استوديو برمجيات مستقل في مدينة الكويت.",
     "about_eyebrow": "من نحن", "about_h1": "عن ديفيجن 11 ستوديوز",
-    "about_lead": "ديفيجن 11 ستوديوز استوديو برمجيات مستقل مقره مدينة الكويت. نصمم ونطوّر وننشر تطبيقات وألعاباً لأجهزة iPhone وiPad وAndroid، ونطوّر برمجيات ومواقع إلكترونية حسب الطلب للعملاء.",
-    "about_p": "تأسس الاستوديو عام 2026. نبني تطبيقاتنا باستخدام Flutter وUnity وننشرها على متجري Apple App Store وGoogle Play. أول إصداراتنا {scorey}، تطبيق لتسجيل نتائج ألعاب الورق التقليدية والحديثة، و{artnest}، تطبيق إبداعي للتلوين والرسم لكل أفراد العائلة.",
+    "about_lead": "ديفيجن 11 ستوديوز استوديو برمجيات مستقل مقره مدينة الكويت. نصمم ونطوّر وننشر تطبيقات وألعاباً، ونطوّر برمجيات ومواقع إلكترونية حسب الطلب للعملاء.",
+    "about_p": "تأسس الاستوديو عام 2026. نختار الأدوات والمنصات التي تناسب كل مشروع، وننشر حيثما يتواجد مستخدمونا. أول إصداراتنا {scorey}، تطبيق لتسجيل نتائج ألعاب الورق التقليدية والحديثة، و{artnest}، تطبيق إبداعي للتلوين والرسم لكل أفراد العائلة.",
     "values_h2": "ما يهمّنا",
     "values": [
         ("سرعة وموثوقية", "تطبيقات تفتح بسرعة، وتعمل دون اتصال حيثما أمكن، ولا تعيقك."),
@@ -228,7 +228,7 @@ T = {
 
 T["en"].update({
     "story_h2": "Our story",
-    "stats": [("2", "Published apps"), ("iOS · Android", "Platforms"), ("EN · AR", "Languages, more coming"), ("2026", "Founded in Kuwait")],
+    "stats": [("2", "Published apps"), ("Multi-platform", "Built for many devices"), ("EN · AR", "Languages, more coming"), ("2026", "Founded in Kuwait")],
     "contact_cards": [
         ("App support", "Questions or problems with Scorey or ArtNest. Include your device model and what happened."),
         ("Business enquiries", "Partnerships, client projects and custom software or website work."),
@@ -237,7 +237,7 @@ T["en"].update({
 })
 T["ar"].update({
     "story_h2": "قصتنا",
-    "stats": [("2", "تطبيقات منشورة"), ("iOS · Android", "المنصات"), ("EN · AR", "اللغات، والمزيد قادم"), ("2026", "تأسس في الكويت")],
+    "stats": [("2", "تطبيقات منشورة"), ("متعدد المنصات", "لأجهزة متعددة"), ("EN · AR", "اللغات، والمزيد قادم"), ("2026", "تأسس في الكويت")],
     "contact_cards": [
         ("دعم التطبيقات", "أسئلة أو مشاكل في Scorey أو ArtNest. اذكر طراز جهازك وما حدث."),
         ("الاستفسارات التجارية", "الشراكات ومشاريع العملاء وتطوير البرمجيات والمواقع حسب الطلب."),
