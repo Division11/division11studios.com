@@ -60,10 +60,11 @@ bdi.ltr{direction:ltr;unicode-bidi:isolate}
 .on-dark .nav a,.on-dark .tool{color:#fff}
 .nav a:hover,.nav a[aria-current]{opacity:1;text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px}
 .tools{display:flex;align-items:center;gap:6px}
-.tool{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font:500 .88rem/1 inherit;cursor:pointer;text-decoration:none;list-style:none}
+.tool{display:inline-flex;align-items:center;gap:5px;height:34px;min-width:34px;justify-content:center;padding:0 9px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font:500 .88rem/1 inherit;cursor:pointer;text-decoration:none;list-style:none}
 .tool::-webkit-details-marker{display:none}
 .on-dark .tool{border-color:rgba(255,255,255,.2)}
-.tool svg{width:18px;height:18px}
+.tool svg{width:18px;height:18px;flex:none}
+.tool-label{font-size:.82rem;font-weight:600}
 .lang{position:relative}
 .lang-menu{position:absolute;inset-inline-end:0;top:44px;min-width:150px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
 .lang-menu a{display:block;padding:8px 12px;border-radius:8px;color:var(--text);text-decoration:none}
@@ -164,3 +165,9 @@ html[lang="ar"] .site-footer h3{font-family:"IBM Plex Sans Arabic",sans-serif;le
 .legal-line{border-top:1px solid rgba(255,255,255,.1);margin-top:36px;padding-top:20px;color:rgba(255,255,255,.55)}
 @media (max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.foot-grid{grid-template-columns:1fr}}
+
+/* ---------- App privacy policies ---------- */
+.policy h2{font-size:1.4rem;margin-top:1.8em;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.policy h3{margin-top:1.4em}
+.policy strong{color:var(--ink)}
+.policy ul{padding-inline-start:1.4em}

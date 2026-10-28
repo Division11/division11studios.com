@@ -13,16 +13,17 @@ Every piece of visible text lives in the `T` (site strings) and `APPS`
 Any string missing for a language falls back to English, so a language can be
 added incrementally. English is served at /, every other language at /<code>/.
 """
-import os, re, shutil, json
+import os, re, shutil, json, hashlib
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "_site")
 SITE = "https://www.division11studios.com"
 UPDATED = "29 October 2026"
+CSS_VER = hashlib.sha1(open(os.path.join(ROOT, "site.css"), "rb").read()).hexdigest()[:10]
 
 LANGS = [
-    {"code": "en", "prefix": "",    "dir": "ltr", "name": "English"},
-    {"code": "ar", "prefix": "/ar", "dir": "rtl", "name": "العربية"},
+    {"code": "en", "prefix": "",    "dir": "ltr", "name": "English", "short": "EN"},
+    {"code": "ar", "prefix": "/ar", "dir": "rtl", "name": "العربية", "short": "ع"},
 ]
 DEFAULT = "en"
 
@@ -128,6 +129,7 @@ T = {
     "privacy_email_p": "If you email us, we use your message and address only to reply.",
     "privacy_contact_h2": "Contact",
     # 404
+    "policy_en_only": "",
     "nf_title": "Page not found", "nf_lead": "The page you’re looking for doesn’t exist.", "nf_home": "Go to the home page",
 },
 "ar": {
@@ -219,6 +221,7 @@ T = {
     "privacy_email_p": "إذا راسلتنا عبر البريد الإلكتروني، نستخدم رسالتك وعنوانك للرد عليك فقط.",
     "privacy_contact_h2": "التواصل",
     # 404
+    "policy_en_only": "سياسة الخصوصية هذه متوفرة حالياً باللغة الإنجليزية فقط.",
     "nf_title": "الصفحة غير موجودة", "nf_lead": "الصفحة التي تبحث عنها غير موجودة.", "nf_home": "العودة إلى الرئيسية",
 },
 }
@@ -340,10 +343,10 @@ def store_buttons(app, lang, cls=""):
             f'<a class="store" href="{app["android"]}" rel="noopener">{play}<span><small>Get it on</small>Google Play</span></a>'
             f'</div>')
 
-ICON_GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>'
-ICON_AUTO = '<svg class="theme-ico-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></svg>'
-ICON_SUN = '<svg class="theme-ico-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
-ICON_MOON = '<svg class="theme-ico-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'
+ICON_GLOBE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>'
+ICON_AUTO = '<svg class="theme-ico-auto" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></svg>'
+ICON_SUN = '<svg class="theme-ico-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+ICON_MOON = '<svg class="theme-ico-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'
 
 THEME_BOOT = "(function(){try{var t=localStorage.getItem('d11-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();"
 THEME_TOGGLE = ("function d11Theme(){var r=document.documentElement,c=r.getAttribute('data-theme'),"
@@ -409,7 +412,7 @@ def page(lang, path, title, desc, body, active=None, hero=False):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?{fonts}&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v={CSS_VER}">
 <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
 </head>
 <body>
@@ -420,7 +423,7 @@ def page(lang, path, title, desc, body, active=None, hero=False):
     <input type="checkbox" id="navtoggle" class="navtoggle" aria-label="{t(lang, 'menu')}">
     <nav class="nav" aria-label="{t(lang, 'menu')}">{nav}</nav>
     <div class="tools">
-      <details class="lang"><summary class="tool" aria-label="{t(lang, 'language')}">{ICON_GLOBE}<span class="tool-label">{d['name']}</span></summary><div class="lang-menu">{langs_menu}</div></details>
+      <details class="lang"><summary class="tool" aria-label="{t(lang, 'language')}">{ICON_GLOBE}<span class="tool-label">{d['short']}</span></summary><div class="lang-menu">{langs_menu}</div></details>
       <button class="tool" type="button" onclick="d11Theme()" aria-label="{t(lang, 'theme')}" title="{t(lang, 'theme')}">{ICON_AUTO}{ICON_SUN}{ICON_MOON}</button>
     </div>
     <label for="navtoggle" class="burger" aria-hidden="true"><span></span><span></span><span></span></label>
@@ -519,7 +522,7 @@ def apps_page(lang):
         <p>{at(a, lang, 'summary')}</p>
         <p class="meta small">{at(a, lang, 'category')} · {at(a, lang, 'platforms')} · {t(lang, 'rated')} {ltr(a['age'])} · {at(a, lang, 'pricing')}</p>
         {store_buttons(a, lang)}
-        <p class="small"><a href="{L(lang, '/' + a['slug'] + '/')}">{t(lang, 'details')}</a> · <a href="/{a['slug']}/privacy/">{t(lang, 'privacy_policy')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'support')}</a></p>
+        <p class="small"><a href="{L(lang, '/' + a['slug'] + '/')}">{t(lang, 'details')}</a> · <a href="{L(lang, '/' + a['slug'] + '/privacy/')}">{t(lang, 'privacy_policy')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'support')}</a></p>
       </div>
     </article>""" for a in APPS)
     body = f"""
@@ -552,7 +555,7 @@ def app_page(lang, a):
     <div><dt>{t(lang, 'f_age')}</dt><dd>{ltr(a['age'])}</dd></div>
     <div><dt>{t(lang, 'f_dev')}</dt><dd>{t(lang, 'brand')}</dd></div>
   </dl>
-  <p class="small"><a href="/{a['slug']}/privacy/">{a['name']} {t(lang, 'policy_suffix')}</a> · <a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'get_support')}</a></p>
+  <p class="small"><a href="{L(lang, '/' + a['slug'] + '/privacy/')}">{a['name']} {t(lang, 'policy_suffix')}</a> · <a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'get_support')}</a></p>
 </div></section>"""
     page(lang, f"/{a['slug']}/", a["name"], f"{a['name']} — {at(a, lang, 'tagline')}. {at(a, lang, 'summary')}", body, active="/apps/")
 
@@ -570,7 +573,7 @@ def about(lang):
 
 def support(lang):
     faq = "".join(f'<details class="faq"><summary>{q}</summary><p>{a}</p></details>' for q, a in t(lang, "faq"))
-    res = "".join(f'<p><strong>{a["name"]}</strong><br><a href="{L(lang, "/" + a["slug"] + "/")}">{t(lang, "about_app")}</a> · <a href="/{a["slug"]}/privacy/">{t(lang, "privacy_policy")}</a></p>' for a in APPS)
+    res = "".join(f'<p><strong>{a["name"]}</strong><br><a href="{L(lang, "/" + a["slug"] + "/")}">{t(lang, "about_app")}</a> · <a href="{L(lang, "/" + a["slug"] + "/privacy/")}">{t(lang, "privacy_policy")}</a></p>' for a in APPS)
     body = f"""
 <section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'support_eyebrow')}</p><h1>{t(lang, 'support_h1')}</h1><p class="lead">{t(lang, 'support_lead')}</p></div></section>
 <section class="section"><div class="wrap two">
@@ -602,7 +605,7 @@ def terms(lang):
     page(lang, "/terms/", t(lang, "terms_title"), t(lang, "terms_desc"), body)
 
 def privacy(lang):
-    items = "".join(f'<li><a href="/{a["slug"]}/privacy/">{a["name"]} — {t(lang, "privacy_policy")}</a></li>' for a in APPS)
+    items = "".join(f'<li><a href="{L(lang, "/" + a["slug"] + "/privacy/")}">{a["name"]} — {t(lang, "privacy_policy")}</a></li>' for a in APPS)
     body = f"""
 <section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'legal_eyebrow')}</p><h1>{t(lang, 'privacy_title')}</h1><p class="muted">{t(lang, 'last_updated')}</p></div></section>
 <section class="section"><div class="wrap narrow prose">
@@ -624,18 +627,41 @@ def notfound():
     body = f'<section class="page-head"><div class="wrap"><p class="eyebrow">404</p>{parts}</div></section>'
     page(DEFAULT, "/404", t(DEFAULT, "nf_title"), t(DEFAULT, "nf_lead"), body)
 
-# ----------------------------------------------- app privacy policies (as-is)
-def copy_policy(slug, src):
+# ------------------------------------------------- app privacy policies
+# The policy texts in policies/*.html are kept verbatim; only their body
+# content is lifted into the site template. A policy may contain one block per
+# language (<div id="content-en">, <div id="content-ar">); languages without a
+# block show the English text.
+def policy_blocks(src):
     with open(os.path.join(ROOT, src), encoding="utf-8") as f:
         h = f.read()
-    back = ('<div style="max-width:850px;margin:0 auto 16px;font:500 14px/1.4 -apple-system,Segoe UI,Roboto,sans-serif">'
-            '<a href="/" style="color:inherit;opacity:.75;text-decoration:none">← Division 11 Studios</a></div>')
-    h = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + back, h, count=1)
-    h = h.replace("</head>", f'<link rel="canonical" href="{SITE}/{slug}/privacy/">\n<link rel="icon" href="/favicon.ico" sizes="any">\n</head>', 1)
-    d = os.path.join(OUT, slug, "privacy")
-    os.makedirs(d, exist_ok=True)
-    with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
-        f.write(h)
+    blocks = {}
+    for m in re.finditer(r'<div id="content-(\w+)"[^>]*>(.*?)</div>\s*(?=<div id="content-|</div>\s*<script|</div>\s*</body)', h, re.S):
+        blocks[m.group(1)] = m.group(2)
+    if not blocks:
+        m = re.search(r'<div class="container">(.*)</div>\s*</body>', h, re.S)
+        blocks["en"] = m.group(1)
+    out = {}
+    date_re = r'<p class="last-updated">(.*?)</p>|<p><strong>(Last Updated:[^<]*)</strong></p>'
+    for code, body in blocks.items():
+        title = re.search(r"<h1>(.*?)</h1>", body, re.S).group(1).strip()
+        date = re.search(date_re, body, re.S)
+        date = re.sub(r"</?strong>", "", date.group(1) or date.group(2)).strip() if date else ""
+        body = re.sub(r"<h1>.*?</h1>", "", body, count=1, flags=re.S)
+        body = re.sub(date_re, "", body, count=1, flags=re.S)
+        body = re.sub(r'<div class="footer">.*?</div>', "", body, flags=re.S)
+        out[code] = (title, date, body.strip())
+    return out
+
+def policy_page(lang, app, blocks):
+    code = lang if lang in blocks else DEFAULT
+    title, date, body = blocks[code]
+    d = next(l for l in LANGS if l["code"] == code)
+    note = "" if code == lang else f'<p class="muted small">{t(lang, "policy_en_only")}</p>'
+    html = f"""
+<section class="page-head"><div class="wrap"><p class="eyebrow">{app['name']}</p><h1>{title}</h1><p class="muted">{date}</p></div></section>
+<section class="section"><div class="wrap narrow">{note}<div class="prose policy" lang="{code}" dir="{d['dir']}">{body}</div></div></section>"""
+    page(lang, f"/{app['slug']}/privacy/", title, f"{title} — {t(lang, 'brand')}", html, active="/apps/")
 
 def statics():
     a = os.path.join(OUT, "assets")
@@ -654,7 +680,7 @@ def statics():
     with open(os.path.join(OUT, ".nojekyll"), "w") as f: f.write("")
     with open(os.path.join(OUT, "robots.txt"), "w") as f:
         f.write(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
-    urls = [L(lang, p) for lang, p in PAGES] + [f"/{x['slug']}/privacy/" for x in APPS]
+    urls = [L(lang, p) for lang, p in PAGES]
     with open(os.path.join(OUT, "sitemap.xml"), "w") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
         for u in urls:
@@ -670,7 +696,9 @@ if __name__ == "__main__":
         for x in APPS:
             app_page(c, x)
     notfound()
-    copy_policy("scorey", "policies/scorey.html")
-    copy_policy("artnest", "policies/artnest.html")
+    for x in APPS:
+        blocks = policy_blocks(f"policies/{x['slug']}.html")
+        for l in LANGS:
+            policy_page(l["code"], x, blocks)
     statics()
     print("built", sum(len(fs) for _, _, fs in os.walk(OUT)), "files")
