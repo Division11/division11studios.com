@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Scorey</title>
+    <style>
+        :root {
+            --bg-body: #f9f9f9;
+            --bg-card: #ffffff;
+            --text-main: #333333;
+            --text-heading: #000000;
+            --text-muted: #666666;
+            --border-color: #eeeeee;
+            --accent-line: #f0f0f0;
+            --btn-bg: #f0f0f0;
+            --btn-active: #333333;
+            --btn-active-text: #ffffff;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #121212;
+                --bg-card: #1e1e1e;
+                --text-main: #e0e0e0;
+                --text-heading: #ffffff;
+                --text-muted: #aaaaaa;
+                --border-color: #333333;
+                --accent-line: #2d2d2d;
+                --btn-bg: #2d2d2d;
+                --btn-active: #e0e0e0;
+                --btn-active-text: #121212;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-main);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: var(--bg-body);
+            transition: all 0.3s ease;
+        }
+        .container {
+            background-color: var(--bg-card);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Language Switcher Styles */
+        .lang-switch-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .lang-switch {
+            display: inline-flex;
+            background-color: var(--btn-bg);
+            border-radius: 8px;
+            padding: 4px;
+        }
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lang-btn.active {
+            background-color: var(--btn-active);
+            color: var(--btn-active-text);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 { color: var(--text-heading); font-size: 2.4rem; margin-bottom: 5px; text-align: center; }
+        .last-updated { text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { color: var(--text-heading); border-bottom: 1px solid var(--accent-line); padding-bottom: 8px; margin-top: 45px; font-size: 1.6rem; }
+        h3 { color: var(--text-heading); margin-top: 25px; font-size: 1.2rem; }
+        p, li { font-size: 1.05rem; margin-bottom: 18px; text-align: justify; }
+        ul { padding-left: 25px; }
+        .footer { margin-top: 60px; text-align: center; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 25px; }
+        strong { color: var(--text-heading); }
+        
+        /* RTL Specific Adjustments */
+        [dir="rtl"] h2, [dir="rtl"] h3 { text-align: right; }
+        [dir="rtl"] p, [dir="rtl"] li { text-align: right; }
+        [dir="rtl"] ul { padding-right: 25px; padding-left: 0; }
+        [dir="rtl"] .footer { direction: ltr; } /* Keeps the copyright symbol correctly positioned */
+
+        @media (max-width: 600px) {
+            body { padding: 20px 10px; }
+            .container { padding: 25px; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="lang-switch-container" dir="ltr">
+        <div class="lang-switch">
+            <button class="lang-btn active" id="btn-en" onclick="switchLanguage('en')">English</button>
+            <button class="lang-btn" id="btn-ar" onclick="switchLanguage('ar')">العربية</button>
+        </div>
+    </div>
+
+    <div id="content-en">
+        <h1>Privacy Policy - Scorey</h1>
+        <p class="last-updated">Effective Date: May 10, 2026</p>
+
+        <p>This Privacy Policy describes the policies and procedures of <strong>Division 11 Studios</strong> ("we," "us," or "our") regarding the collection, use, and disclosure of information when you use the <strong>Scorey</strong> mobile application (the "Service").</p>
+
+        <h2>1. Introduction</h2>
+        <p>We respect your privacy and are committed to protecting it through compliance with this policy. This Service is designed to function as an anonymous game score calculator. By using the Service, you agree to the collection and use of information in accordance with this Privacy Policy.</p>
+
+        <h2>2. Types of Data Collected</h2>
+        
+        <h3>A. Personal Data</h3>
+        <p>While using our Service, we do not require you to provide any personally identifiable information (PII) to access core functionalities. However, if you choose to utilize the "Contact Us" feature, you may voluntarily provide your email address. This information is used exclusively for support-related correspondence.</p>
+
+        <h3>B. Usage and Device Data</h3>
+        <p>The Service may utilize third-party SDKs, specifically <strong>Firebase Analytics</strong>, <strong>Firebase Crashlytics</strong>, and <strong>Unity LevelPlay</strong> (for ad mediation), which may collect certain non-personally identifiable information automatically, including but not limited to:</p>
+        <ul>
+            <li>Device identifiers (e.g., IDFA for iOS, AAID for Android, or Firebase Installation IDs).</li>
+            <li>Basic device technical information (OS version, device model, and crash logs).</li>
+            <li>Product interaction data (screen views, app launches, and game type usage).</li>
+            <li>Advertising interaction data.</li>
+        </ul>
+
+        <h2>3. Data Storage and Retention</h2>
+        <p><strong>Local Storage & Cloud Syncing:</strong> Your primary user-generated content, such as saved game history, is stored locally on your device. However, when utilizing "Spectator Mode," active session data (including scores, game rules, and display names) is temporarily hosted via <strong>Firebase Realtime Database</strong> to allow remote devices to sync.</p>
+        <p><strong>Retention:</strong> This cloud-hosted spectator data is volatile and is permanently purged from our databases immediately upon the conclusion of the game session. Personal information provided via support emails (EmailJS) is retained only for the duration necessary to resolve the inquiry or as required by applicable legal obligations.</p>
+
+        <h2>4. Disclosure of Data</h2>
+        <p>We do not sell, trade, or otherwise transfer your information to outside parties. This does not include trusted third parties who assist us in operating our Service, such as:</p>
+        <ul>
+            <li><strong>Google LLC:</strong> For app analytics, crash reporting (Firebase Crashlytics), and temporary real-time database hosting.</li>
+            <li><strong>Unity Technologies & Ad Partners:</strong> For the provision of advertisement mediation via Unity LevelPlay, which includes various third-party bidding networks.</li>
+            <li><strong>EmailJS:</strong> For the secure transmission of support requests.</li>
+            <li><strong>App Store Providers:</strong> Apple Inc. and Google LLC for the processing of In-App Purchases (IAP).</li>
+        </ul>
+
+        <h2>5. Security of Data</h2>
+        <p>The security of your data is important to us. We employ industry-standard encryption protocols (TLS/SSL) for data in transit through our third-party service providers. However, please be advised that no method of electronic transmission or storage is 100% secure.</p>
+
+        <h2>6. Data Subject Rights</h2>
+        <p>You have the right to access, update, or delete the information we have on you. Since your primary data is stored locally, you may exercise these rights by:</p>
+        <ul>
+            <li>Deleting specific game entries within the App interface.</li>
+            <li>Clearing the App's cache/data via device settings.</li>
+            <li>Uninstalling the App from your mobile device.</li>
+        </ul>
+
+        <h2>7. Children's Privacy</h2>
+        <p>Our Service does not address anyone under the age of 13. We do not knowingly collect personally identifiable information from children. If we become aware that we have collected Personal Data from a child without verification of parental consent, we take steps to remove that information from our records.</p>
+
+        <h2>8. Contact Information</h2>
+        <p>For questions or concerns regarding this Privacy Policy, please contact our support team at:</p>
+        <p><strong>Email:</strong> support@division11studios.com</p>
+
+        <div class="footer">
+            © 2026 Division 11 Studios. All Rights Reserved.
+        </div>
+    </div>
+
+    <div id="content-ar" style="display: none;">
+        <h1>سياسة الخصوصية - سكوري</h1>
+        <p class="last-updated">تاريخ السريان: 10 مايو 2026</p>
+
+        <p>تصف سياسة الخصوصية هذه سياسات وإجراءات <strong>Division 11 Studios</strong> ("نحن" أو "لنا" أو "خاصتنا") فيما يتعلق بجمع واستخدام والكشف عن المعلومات عند استخدامك لتطبيق الهاتف المحمول <strong>Scorey</strong> ("الخدمة").</p>
+
+        <h2>1. مقدمة</h2>
+        <p>نحن نحترم خصوصيتك ونلتزم بحمايتها من خلال الامتثال لهذه السياسة. تم تصميم هذه الخدمة لتعمل كحاسبة لنتائج الألعاب مجهولة الهوية. باستخدامك للخدمة، فإنك توافق على جمع واستخدام المعلومات وفقاً لسياسة الخصوصية هذه.</p>
+
+        <h2>2. أنواع البيانات المجمعة</h2>
+        
+        <h3>أ. البيانات الشخصية</h3>
+        <p>أثناء استخدام خدمتنا، لا نطلب منك تقديم أي معلومات تعريف شخصية للوصول إلى الوظائف الأساسية. ومع ذلك، إذا اخترت استخدام ميزة "اتصل بنا"، فيمكنك طواعية تقديم عنوان بريدك الإلكتروني. تُستخدم هذه المعلومات حصرياً للمراسلات المتعلقة بالدعم.</p>
+
+        <h3>ب. بيانات الاستخدام والجهاز</h3>
+        <p>قد تستخدم الخدمة حزم تطوير برمجيات (SDKs) لجهات خارجية، وتحديداً <strong>Firebase Analytics</strong>، و <strong>Firebase Crashlytics</strong>، و <strong>Unity LevelPlay</strong> (لوساطة الإعلانات)، والتي قد تجمع بعض المعلومات غير الشخصية تلقائياً، بما في ذلك على سبيل المثال لا الحصر:</p>
+        <ul>
+            <li>معرفات الجهاز (مثل IDFA لنظام iOS، أو AAID لنظام Android، أو معرفات تثبيت Firebase).</li>
+            <li>المعلومات الفنية الأساسية للجهاز (إصدار نظام التشغيل، طراز الجهاز، وسجلات الأعطال).</li>
+            <li>بيانات التفاعل مع المنتج (مشاهدات الشاشة، عمليات تشغيل التطبيق، واستخدام نوع اللعبة).</li>
+            <li>بيانات التفاعل مع الإعلانات.</li>
+        </ul>
+
+        <h2>3. تخزين البيانات والاحتفاظ بها</h2>
+        <p><strong>التخزين المحلي والمزامنة السحابية:</strong> يتم تخزين المحتوى الأساسي الذي ينشئه المستخدم، مثل سجل الألعاب المحفوظة، محلياً على جهازك. ومع ذلك، عند استخدام "وضع المتفرج" (Spectator Mode)، يتم استضافة بيانات الجلسة النشطة (بما في ذلك النتائج، وقواعد اللعبة، وأسماء العرض) مؤقتاً عبر <strong>Firebase Realtime Database</strong> للسماح بمزامنة الأجهزة عن بُعد.</p>
+        <p><strong>الاحتفاظ بالبيانات:</strong> بيانات المتفرج المستضافة سحابياً هي بيانات مؤقتة ويتم مسحها نهائياً من قواعد بياناتنا فور انتهاء جلسة اللعبة. يتم الاحتفاظ بالمعلومات الشخصية المقدمة عبر رسائل البريد الإلكتروني للدعم (EmailJS) فقط للمدة اللازمة لحل الاستفسار أو كما تقتضي الالتزامات القانونية المعمول بها.</p>
+
+        <h2>4. الإفصاح عن البيانات</h2>
+        <p>نحن لا نبيع أو نتاجر أو ننقل معلوماتك إلى أطراف خارجية. لا يشمل ذلك الأطراف الخارجية الموثوقة التي تساعدنا في تشغيل خدمتنا، مثل:</p>
+        <ul>
+            <li><strong>Google LLC:</strong> لتحليلات التطبيق، وتقارير الأعطال (Firebase Crashlytics)، والاستضافة المؤقتة لقاعدة البيانات في الوقت الفعلي.</li>
+            <li><strong>Unity Technologies وشركاء الإعلانات:</strong> لتوفير وساطة الإعلانات عبر Unity LevelPlay، والتي تتضمن شبكات مزايدة تابعة لجهات خارجية.</li>
+            <li><strong>EmailJS:</strong> للنقل الآمن لطلبات الدعم.</li>
+            <li><strong>مزودي متاجر التطبيقات:</strong> شركة Apple Inc. وشركة Google LLC لمعالجة عمليات الشراء داخل التطبيق (IAP).</li>
+        </ul>
+
+        <h2>5. أمن البيانات</h2>
+        <p>إن أمن بياناتك أمر مهم بالنسبة لنا. نحن نستخدم بروتوكولات التشفير المتوافقة مع معايير الصناعة (TLS/SSL) للبيانات أثناء انتقالها من خلال مزودي الخدمات من الجهات الخارجية. ومع ذلك، يُرجى العلم بأنه لا توجد طريقة للنقل الإلكتروني أو التخزين آمنة بنسبة 100%.</p>
+
+        <h2>6. حقوق صاحب البيانات</h2>
+        <p>يحق لك الوصول إلى المعلومات التي نحتفظ بها عنك أو تحديثها أو حذفها. نظراً لأن بياناتك الأساسية يتم تخزينها محلياً، يمكنك ممارسة هذه الحقوق عن طريق:</p>
+        <ul>
+            <li>حذف إدخالات ألعاب معينة داخل واجهة التطبيق.</li>
+            <li>مسح ذاكرة التخزين المؤقت/بيانات التطبيق عبر إعدادات الجهاز.</li>
+            <li>إلغاء تثبيت التطبيق من جهازك المحمول.</li>
+        </ul>
+
+        <h2>7. خصوصية الأطفال</h2>
+        <p>لا تُوجه خدمتنا لأي شخص يقل عمره عن 13 عاماً. نحن لا نجمع عن قصد معلومات تعريف شخصية من الأطفال. إذا علمنا أننا جمعنا بيانات شخصية من طفل دون التحقق من موافقة الوالدين، فإننا نتخذ خطوات لإزالة هذه المعلومات من سجلاتنا.</p>
+
+        <h2>8. معلومات الاتصال</h2>
+        <p>للأسئلة أو الاستفسارات المتعلقة بسياسة الخصوصية هذه، يُرجى الاتصال بفريق الدعم لدينا على:</p>
+        <p><strong>البريد الإلكتروني:</strong> support@division11studios.com</p>
+
+        <div class="footer">
+            © 2026 Division 11 Studios. جميع الحقوق محفوظة.
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function switchLanguage(lang) {
+        const contentEn = document.getElementById('content-en');
+        const contentAr = document.getElementById('content-ar');
+        const btnEn = document.getElementById('btn-en');
+        const btnAr = document.getElementById('btn-ar');
+        const htmlTag = document.documentElement;
+
+        if (lang === 'ar') {
+            // Switch to Arabic
+            htmlTag.setAttribute('lang', 'ar');
+            htmlTag.setAttribute('dir', 'rtl');
+            contentEn.style.display = 'none';
+            contentAr.style.display = 'block';
+            btnEn.classList.remove('active');
+            btnAr.classList.add('active');
+        } else {
+            // Switch to English
+            htmlTag.setAttribute('lang', 'en');
+            htmlTag.setAttribute('dir', 'ltr');
+            contentEn.style.display = 'block';
+            contentAr.style.display = 'none';
+            btnAr.classList.remove('active');
+            btnEn.classList.add('active');
+        }
+    }
+</script>
+
+</body>
+</html>
