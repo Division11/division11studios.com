@@ -226,6 +226,25 @@ T = {
 },
 }
 
+T["en"].update({
+    "story_h2": "Our story",
+    "stats": [("2", "Published apps"), ("iOS · Android", "Platforms"), ("EN · AR", "Languages, more coming"), ("2026", "Founded in Kuwait")],
+    "contact_cards": [
+        ("App support", "Questions or problems with Scorey or ArtNest. Include your device model and what happened."),
+        ("Business enquiries", "Partnerships, client projects and custom software or website work."),
+        ("Call us", "Prefer to talk? Call our office in Kuwait City."),
+    ],
+})
+T["ar"].update({
+    "story_h2": "قصتنا",
+    "stats": [("2", "تطبيقات منشورة"), ("iOS · Android", "المنصات"), ("EN · AR", "اللغات، والمزيد قادم"), ("2026", "تأسس في الكويت")],
+    "contact_cards": [
+        ("دعم التطبيقات", "أسئلة أو مشاكل في Scorey أو ArtNest. اذكر طراز جهازك وما حدث."),
+        ("الاستفسارات التجارية", "الشراكات ومشاريع العملاء وتطوير البرمجيات والمواقع حسب الطلب."),
+        ("اتصل بنا", "تفضّل التحدث معنا؟ اتصل بمكتبنا في مدينة الكويت."),
+    ],
+})
+
 # --------------------------------------------------------------------- apps
 APPS = [
     {
@@ -462,6 +481,30 @@ def page(lang, path, title, desc, body, active=None, hero=False):
     write(lang, path, html)
 
 # -------------------------------------------------------------------- pages
+def _svg(path):
+    return f'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{path}</svg>'
+
+ICONS = {
+    "phone": _svg('<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/>'),
+    "game": _svg('<path d="M6.5 8h11a4 4 0 0 1 3.9 4.9l-.9 4a2.6 2.6 0 0 1-4.4 1.2L14 16h-4l-2.1 2.1a2.6 2.6 0 0 1-4.4-1.2l-.9-4A4 4 0 0 1 6.5 8z"/><path d="M8 11v3M6.5 12.5h3M15.5 12h.01M17.5 13.5h.01"/>'),
+    "web": _svg('<rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="M2.5 8.5h19M6 6.3h.01M8.5 6.3h.01"/>'),
+    "bolt": _svg('<path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12l1-8z"/>'),
+    "lock": _svg('<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>'),
+    "lang": _svg('<path d="M4 5h8M8 3v2M10.5 5c-.7 3.8-3 6.6-6 8M6 8.5c1 2 2.8 3.6 5 4.5"/><path d="M13 21l4-9 4 9M14.5 18h5"/>'),
+    "mail": _svg('<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6.5 9 6.5 9-6.5"/>'),
+    "brief": _svg('<rect x="2.5" y="7" width="19" height="13" rx="2.5"/><path d="M8.5 7V5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2M2.5 12.5h19"/>'),
+    "call": _svg('<path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 7.2 7.2l1.4-2.1 4.2 1.6V19a1.9 1.9 0 0 1-2 1.9A16.5 16.5 0 0 1 3.1 5.5 1.9 1.9 0 0 1 5 3.5z"/>'),
+}
+
+def feature(h, p, icon=None, num=None):
+    badge = f'<span class="badge">{ICONS[icon]}</span>' if icon else (f'<span class="badge num">{num:02d}</span>' if num else "")
+    return f'<div class="feature">{badge}<h3>{h}</h3><p>{p}</p></div>'
+
+def page_hero(eyebrow, h1, lead="", meta=""):
+    lead = f'<p class="lead">{lead}</p>' if lead else ""
+    meta = f'<p class="hero-meta">{meta}</p>' if meta else ""
+    return f'<section class="page-hero"><div class="wrap"><p class="eyebrow">{eyebrow}</p><h1>{h1}</h1>{lead}{meta}</div></section>'
+
 def home(lang):
     cards = "".join(f"""
     <article class="app-card">
@@ -474,7 +517,7 @@ def home(lang):
         {store_buttons(a, lang, 'compact')}
       </div>
     </article>""" for a in APPS)
-    what = "".join(f'<div class="feature"><h3>{h}</h3><p>{p}</p></div>' for h, p in t(lang, "what"))
+    what = "".join(feature(h, p, icon=i) for (h, p), i in zip(t(lang, "what"), ["phone", "game", "web"]))
     body = f"""
 <section class="hero">
   <div class="wrap hero-inner">
@@ -514,26 +557,29 @@ def home(lang):
     page(lang, "/", "", t(lang, "home_desc"), body, active="/", hero=True)
 
 def apps_page(lang):
-    rows = "".join(f"""
-    <article class="app-row">
-      {icon_html(a)}
-      <div>
-        <h2><a href="{L(lang, '/' + a['slug'] + '/')}">{a['name']}</a> <span class="tag">— {at(a, lang, 'tagline')}</span></h2>
+    cards = "".join(f"""
+    <article class="show-card" style="--a:{a['accent']};--b:{a['bg']}">
+      <a class="show-banner" href="{L(lang, '/' + a['slug'] + '/')}">
+        {icon_html(a, 'xl')}
+        <div><h2>{a['name']}</h2><p>{at(a, lang, 'tagline')}</p></div>
+      </a>
+      <div class="show-body">
         <p>{at(a, lang, 'summary')}</p>
-        <p class="meta small">{at(a, lang, 'category')} · {at(a, lang, 'platforms')} · {t(lang, 'rated')} {ltr(a['age'])} · {at(a, lang, 'pricing')}</p>
+        <ul class="chips"><li>{at(a, lang, 'category')}</li><li>{at(a, lang, 'platforms')}</li><li>{t(lang, 'rated')} {ltr(a['age'])}</li></ul>
         {store_buttons(a, lang)}
-        <p class="small"><a href="{L(lang, '/' + a['slug'] + '/')}">{t(lang, 'details')}</a> · <a href="{L(lang, '/' + a['slug'] + '/privacy/')}">{t(lang, 'privacy_policy')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'support')}</a></p>
+        <p class="small links"><a href="{L(lang, '/' + a['slug'] + '/')}">{t(lang, 'details')} {t(lang, 'arrow')}</a><a href="{L(lang, '/' + a['slug'] + '/privacy/')}">{t(lang, 'privacy_policy')}</a></p>
       </div>
     </article>""" for a in APPS)
     body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'apps_head_eyebrow')}</p><h1>{t(lang, 'apps_head_h1')}</h1><p class="lead">{t(lang, 'apps_head_lead')}</p></div></section>
-<section class="section"><div class="wrap app-list">{rows}
-<p class="muted">{t(lang, 'more_coming')}</p>
+{page_hero(t(lang, 'apps_head_eyebrow'), t(lang, 'apps_head_h1'), t(lang, 'apps_head_lead'))}
+<section class="section"><div class="wrap">
+  <div class="showcase">{cards}</div>
+  <div class="coming"><span class="badge">{ICONS['game']}</span><p>{t(lang, 'more_coming')}</p></div>
 </div></section>"""
-    page(lang, "/apps/", t(lang, "apps_title"), t(lang, "apps_desc"), body, active="/apps/")
+    page(lang, "/apps/", t(lang, "apps_title"), t(lang, "apps_desc"), body, active="/apps/", hero=True)
 
 def app_page(lang, a):
-    feats = "".join(f'<div class="feature"><h3>{h}</h3><p>{p}</p></div>' for h, p in at(a, lang, "features"))
+    feats = "".join(feature(h, p, num=i + 1) for i, (h, p) in enumerate(at(a, lang, "features")))
     body = f"""
 <section class="app-hero" style="--a:{a['accent']};--b:{a['bg']}">
   <div class="wrap app-hero-inner">
@@ -546,8 +592,8 @@ def app_page(lang, a):
     </div>
   </div>
 </section>
-<section class="section"><div class="wrap narrow"><p class="lead dark">{at(a, lang, 'summary')}</p></div></section>
-<section class="section tint"><div class="wrap"><div class="section-head"><h2>{t(lang, 'features')}</h2></div><div class="three">{feats}</div></div></section>
+<section class="section"><div class="wrap narrow"><p class="lead dark big">{at(a, lang, 'summary')}</p></div></section>
+<section class="section tint" style="--a:{a['accent']};--b:{a['bg']}"><div class="wrap"><div class="section-head"><h2>{t(lang, 'features')}</h2></div><div class="three app-feats">{feats}</div></div></section>
 <section class="section"><div class="wrap">
   <dl class="facts">
     <div><dt>{t(lang, 'f_platforms')}</dt><dd>{at(a, lang, 'platforms')}</dd></div>
@@ -555,77 +601,78 @@ def app_page(lang, a):
     <div><dt>{t(lang, 'f_age')}</dt><dd>{ltr(a['age'])}</dd></div>
     <div><dt>{t(lang, 'f_dev')}</dt><dd>{t(lang, 'brand')}</dd></div>
   </dl>
-  <p class="small"><a href="{L(lang, '/' + a['slug'] + '/privacy/')}">{a['name']} {t(lang, 'policy_suffix')}</a> · <a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'get_support')}</a></p>
+  <p class="small links"><a href="{L(lang, '/' + a['slug'] + '/privacy/')}">{a['name']} {t(lang, 'policy_suffix')}</a><a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a><a href="{L(lang, '/support/')}">{t(lang, 'get_support')}</a></p>
 </div></section>"""
-    page(lang, f"/{a['slug']}/", a["name"], f"{a['name']} — {at(a, lang, 'tagline')}. {at(a, lang, 'summary')}", body, active="/apps/")
+    page(lang, f"/{a['slug']}/", a["name"], f"{a['name']} — {at(a, lang, 'tagline')}. {at(a, lang, 'summary')}", body, active="/apps/", hero=True)
 
 def about(lang):
     links = {a["slug"]: f'<a href="{L(lang, "/" + a["slug"] + "/")}">{a["name"]}</a>' for a in APPS}
-    values = "".join(f'<div class="feature"><h3>{h}</h3><p>{p}</p></div>' for h, p in t(lang, "values"))
+    values = "".join(feature(h, p, icon=i) for (h, p), i in zip(t(lang, "values"), ["bolt", "lock", "lang"]))
+    stats = "".join(f'<div class="stat"><span class="stat-n">{ltr(n)}</span><span class="stat-l">{l}</span></div>' for n, l in t(lang, "stats"))
+    icons = "".join(f'<a href="{L(lang, "/" + a["slug"] + "/")}" aria-label="{a["name"]}">{icon_html(a)}</a>' for a in APPS)
     body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'about_eyebrow')}</p><h1>{t(lang, 'about_h1')}</h1></div></section>
-<section class="section"><div class="wrap narrow">
-  <p class="lead dark">{t(lang, 'about_lead')}</p>
-  <p>{t(lang, 'about_p').format(**links)}</p>
+{page_hero(t(lang, 'about_eyebrow'), t(lang, 'about_h1'), t(lang, 'about_lead'))}
+<section class="section"><div class="wrap about-grid">
+  <div class="prose">
+    <h2>{t(lang, 'story_h2')}</h2>
+    <p>{t(lang, 'about_p').format(**links)}</p>
+    <div class="icon-row">{icons}</div>
+  </div>
+  <div class="stats">{stats}</div>
 </div></section>
 <section class="section tint"><div class="wrap"><div class="section-head"><h2>{t(lang, 'values_h2')}</h2></div><div class="three">{values}</div></div></section>"""
-    page(lang, "/about/", t(lang, "about_title"), t(lang, "about_desc"), body, active="/about/")
+    page(lang, "/about/", t(lang, "about_title"), t(lang, "about_desc"), body, active="/about/", hero=True)
 
 def support(lang):
-    faq = "".join(f'<details class="faq"><summary>{q}</summary><p>{a}</p></details>' for q, a in t(lang, "faq"))
-    res = "".join(f'<p><strong>{a["name"]}</strong><br><a href="{L(lang, "/" + a["slug"] + "/")}">{t(lang, "about_app")}</a> · <a href="{L(lang, "/" + a["slug"] + "/privacy/")}">{t(lang, "privacy_policy")}</a></p>' for a in APPS)
+    chev = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+    faq = "".join(f'<details class="faq"><summary>{q}{chev}</summary><p>{a}</p></details>' for q, a in t(lang, "faq"))
+    c = t(lang, "contact_cards")
+    cards = (f'<a class="contact-card" href="mailto:{CO["support"]}"><span class="badge">{ICONS["mail"]}</span><h3>{c[0][0]}</h3><p>{c[0][1]}</p><span class="cc-link">{ltr(CO["support"])}</span></a>'
+             f'<a class="contact-card" href="mailto:{CO["dev"]}"><span class="badge">{ICONS["brief"]}</span><h3>{c[1][0]}</h3><p>{c[1][1]}</p><span class="cc-link">{ltr(CO["dev"])}</span></a>'
+             f'<a class="contact-card" href="tel:{CO["phone_href"]}"><span class="badge">{ICONS["call"]}</span><h3>{c[2][0]}</h3><p>{c[2][1]}</p><span class="cc-link">{ltr(CO["phone"])}</span></a>')
+    res = "".join(f'<div class="res-app">{icon_html(a)}<div><strong>{a["name"]}</strong><br><a href="{L(lang, "/" + a["slug"] + "/")}">{t(lang, "about_app")}</a> · <a href="{L(lang, "/" + a["slug"] + "/privacy/")}">{t(lang, "privacy_policy")}</a></div></div>' for a in APPS)
     body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'support_eyebrow')}</p><h1>{t(lang, 'support_h1')}</h1><p class="lead">{t(lang, 'support_lead')}</p></div></section>
+{page_hero(t(lang, 'support_eyebrow'), t(lang, 'support_h1'), t(lang, 'support_lead'))}
+<section class="section pull-up"><div class="wrap"><div class="three contact-cards">{cards}</div></div></section>
 <section class="section"><div class="wrap two">
-  <div class="prose">
-    <h2>{t(lang, 'contact_support')}</h2>
-    <p>{t(lang, 'support_p1').format(email=mail(CO['support']))}</p>
-    <p>{t(lang, 'support_p2').format(dev=mail(CO['dev']), phone=tel())}</p>
+  <div>
     <h2>{t(lang, 'faq_h2')}</h2>
     {faq}
   </div>
   <aside class="card">
-    <h2>{t(lang, 'app_resources')}</h2>
+    <h2 class="h-small">{t(lang, 'app_resources')}</h2>
     {res}
-    <p><a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a></p>
+    <p class="small"><a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a> · <a href="{L(lang, '/privacy/')}">{t(lang, 'privacy')}</a></p>
   </aside>
 </div></section>"""
-    page(lang, "/support/", t(lang, "support_title"), t(lang, "support_desc"), body, active="/support/")
+    page(lang, "/support/", t(lang, "support_title"), t(lang, "support_desc"), body, active="/support/", hero=True)
+
+def legal_page(lang, path, title, desc, eyebrow, meta, inner):
+    body = f"""
+{page_hero(eyebrow, title, meta=meta)}
+<section class="section legal-wrap pull-up"><div class="wrap narrow"><div class="paper prose">{inner}</div></div></section>"""
+    page(lang, path, title, desc, body, hero=True)
 
 def terms(lang):
     secs = "".join(f"<h2>{h}</h2><p>{p.format(email=mail(CO['support']))}</p>" for h, p in t(lang, "terms_body"))
     note = f'<p class="muted small">{t(lang, "translation_note")}</p>' if t(lang, "translation_note") else ""
-    body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'legal_eyebrow')}</p><h1>{t(lang, 'terms_title')}</h1><p class="muted">{t(lang, 'last_updated')}</p></div></section>
-<section class="section"><div class="wrap narrow prose">
-<p>{t(lang, 'terms_intro')}</p>
-{secs}
-{note}
-</div></section>"""
-    page(lang, "/terms/", t(lang, "terms_title"), t(lang, "terms_desc"), body)
+    legal_page(lang, "/terms/", t(lang, "terms_title"), t(lang, "terms_desc"), t(lang, "legal_eyebrow"), t(lang, "last_updated"),
+               f"<p class=\"lead dark\">{t(lang, 'terms_intro')}</p>{secs}{note}")
 
 def privacy(lang):
-    items = "".join(f'<li><a href="{L(lang, "/" + a["slug"] + "/privacy/")}">{a["name"]} — {t(lang, "privacy_policy")}</a></li>' for a in APPS)
-    body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'legal_eyebrow')}</p><h1>{t(lang, 'privacy_title')}</h1><p class="muted">{t(lang, 'last_updated')}</p></div></section>
-<section class="section"><div class="wrap narrow prose">
-<h2>{t(lang, 'privacy_apps_h2')}</h2>
-<ul>{items}</ul>
-<h2>{t(lang, 'privacy_site_h2')}</h2>
-<p>{t(lang, 'privacy_site_p')}</p>
-<p>{t(lang, 'privacy_email_p')}</p>
-<h2>{t(lang, 'privacy_contact_h2')}</h2>
-<p>{mail(CO['support'])}</p>
-</div></section>"""
-    page(lang, "/privacy/", t(lang, "privacy_title"), t(lang, "privacy_desc"), body)
+    items = "".join(f'<a class="res-app" href="{L(lang, "/" + a["slug"] + "/privacy/")}">{icon_html(a)}<div><strong>{a["name"]}</strong><br><span class="muted small">{t(lang, "privacy_policy")} {t(lang, "arrow")}</span></div></a>' for a in APPS)
+    legal_page(lang, "/privacy/", t(lang, "privacy_title"), t(lang, "privacy_desc"), t(lang, "legal_eyebrow"), t(lang, "last_updated"),
+               f"""<h2 class="first">{t(lang, 'privacy_apps_h2')}</h2><div class="policy-list">{items}</div>
+<h2>{t(lang, 'privacy_site_h2')}</h2><p>{t(lang, 'privacy_site_p')}</p><p>{t(lang, 'privacy_email_p')}</p>
+<h2>{t(lang, 'privacy_contact_h2')}</h2><p>{mail(CO['support'])}</p>""")
 
 def notfound():
     parts = "".join(
         f'<div lang="{l["code"]}" dir="{l["dir"]}" style="margin-bottom:24px"><h1>{t(l["code"], "nf_title")}</h1>'
         f'<p class="lead">{t(l["code"], "nf_lead")} <a href="{L(l["code"], "/")}">{t(l["code"], "nf_home")}</a></p></div>'
         for l in LANGS)
-    body = f'<section class="page-head"><div class="wrap"><p class="eyebrow">404</p>{parts}</div></section>'
-    page(DEFAULT, "/404", t(DEFAULT, "nf_title"), t(DEFAULT, "nf_lead"), body)
+    body = f'<section class="page-hero"><div class="wrap"><p class="eyebrow">404</p>{parts}</div></section>'
+    page(DEFAULT, "/404", t(DEFAULT, "nf_title"), t(DEFAULT, "nf_lead"), body, hero=True)
 
 # ------------------------------------------------- app privacy policies
 # The policy texts in policies/*.html are kept verbatim; only their body
@@ -657,11 +704,11 @@ def policy_page(lang, app, blocks):
     code = lang if lang in blocks else DEFAULT
     title, date, body = blocks[code]
     d = next(l for l in LANGS if l["code"] == code)
-    note = "" if code == lang else f'<p class="muted small">{t(lang, "policy_en_only")}</p>'
-    html = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">{app['name']}</p><h1>{title}</h1><p class="muted">{date}</p></div></section>
-<section class="section"><div class="wrap narrow">{note}<div class="prose policy" lang="{code}" dir="{d['dir']}">{body}</div></div></section>"""
-    page(lang, f"/{app['slug']}/privacy/", title, f"{title} — {t(lang, 'brand')}", html, active="/apps/")
+    note = "" if code == lang else f'<p class="note">{t(lang, "policy_en_only")}</p>'
+    body = f"""
+{page_hero(app['name'], title, meta=date)}
+<section class="section legal-wrap pull-up"><div class="wrap narrow">{note}<div class="paper prose policy" lang="{code}" dir="{d['dir']}">{body}</div></div></section>"""
+    page(lang, f"/{app['slug']}/privacy/", title, f"{title} — {t(lang, 'brand')}", body, active="/apps/", hero=True)
 
 def statics():
     a = os.path.join(OUT, "assets")
