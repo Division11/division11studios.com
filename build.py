@@ -1,125 +1,429 @@
 #!/usr/bin/env python3
 """Generates the division11studios.com static site into ./_site.
 
-Edit the CO / APPS data below, then run `python3 build.py` (no dependencies).
-GitHub Actions runs this on every push to main and deploys _site to Pages.
-"""
-import os, re, shutil
+Run `python3 build.py` (no dependencies). GitHub Actions runs this on every
+push to main and deploys _site to GitHub Pages.
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_site")
-SRC = os.path.dirname(os.path.abspath(__file__))
+Languages
+---------
+Every piece of visible text lives in the `T` (site strings) and `APPS`
+(per-app text) tables below, keyed by language code. To add a language:
+  1. add it to LANGS (code, URL prefix, text direction, name in that language)
+  2. add a block for it in T and in each app's "text"
+Any string missing for a language falls back to English, so a language can be
+added incrementally. English is served at /, every other language at /<code>/.
+"""
+import os, re, shutil, json
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(ROOT, "_site")
+SITE = "https://www.division11studios.com"
+UPDATED = "29 October 2026"
+
+LANGS = [
+    {"code": "en", "prefix": "",    "dir": "ltr", "name": "English"},
+    {"code": "ar", "prefix": "/ar", "dir": "rtl", "name": "العربية"},
+]
+DEFAULT = "en"
 
 CO = {
-    "brand": "Division 11 Studios",
-    "legal": "Division Eleven Studios – Custom Software Design and Development",
-    "legal_short": "Division Eleven Studios S.P.C.",
-    "legal_ar": "شركة ديفيجن إيليفن ستوديوز لتصميم وبرمجة البرمجيات الخاصة ش.ش.و.",
-    "form": "Single Person Company (S.P.C.)",
-    "cr": "552091",
-    "founded": "2026",
-    "addr_lines": ["Building 9, Street 133", "Block 1, Al Nahda", "Kuwait City, Kuwait"],
     "phone": "+965 9008 5898",
     "phone_href": "+96590085898",
     "support": "support@division11studios.com",
     "dev": "dev@division11studios.com",
-    "ceo": "Abdulrahman Bader Abdulwahab Alsanad",
     "instagram": "https://www.instagram.com/division11studios/",
     "tiktok": "https://www.tiktok.com/@division11studios",
 }
 
+# ---------------------------------------------------------------- site strings
+T = {
+"en": {
+    "brand": "Division 11 Studios",
+    "legal": "Division Eleven Studios – Custom Software Design and Development",
+    "legal_note": "“Division 11 Studios” is the trading name of Division Eleven Studios S.P.C.",
+    "addr": ["Building 9, Street 133", "Block 1, Al Nahda", "Kuwait City, Kuwait"],
+    "nav_home": "Home", "nav_apps": "Apps", "nav_about": "About", "nav_support": "Support",
+    "skip": "Skip to content", "menu": "Menu", "language": "Language",
+    "theme": "Switch theme (system, light, dark)",
+    "tagline_footer": "Mobile apps and games, designed and built in Kuwait.",
+    "f_company": "Company", "f_address": "Address", "f_contact": "Contact",
+    "privacy": "Privacy", "terms": "Terms",
+    "rights": "All rights reserved.",
+    "ios_small": "Download on the", "ios_big": "App Store",
+    "gp_small": "Get it on", "gp_big": "Google Play",
+    "arrow": "→",
+    # home
+    "home_title": "Division 11 Studios — Mobile apps & games from Kuwait",
+    "home_desc": "Division 11 Studios is an independent mobile app and game studio in Kuwait, makers of Scorey and ArtNest.",
+    "hero_eyebrow": "Independent app studio · Kuwait",
+    "hero_h1": "We design and build mobile apps and games people actually use.",
+    "hero_lead": "Division 11 Studios develops and publishes apps for iPhone, iPad and Android — from everyday utilities to creative tools for families — and builds custom software and websites for clients.",
+    "cta_apps": "See our apps", "cta_about": "About the studio",
+    "apps_eyebrow": "Published apps", "apps_h2": "Available now on the App Store and Google Play",
+    "what_eyebrow": "What we do", "what_h2": "Software design and development",
+    "what": [
+        ("Mobile apps", "Apps for iOS and Android built with Flutter, from first prototype to store release, updates and support."),
+        ("Games & interactive", "Casual and creative games built in Unity, with attention to performance, accessibility and family-safe design."),
+        ("Websites & maintenance", "Website design, development and ongoing software maintenance for businesses in Kuwait and the region."),
+    ],
+    "contact_eyebrow": "Get in touch", "contact_h2": "Have a question or a project in mind?",
+    "contact_p": "Write to us about our apps, partnerships or custom software work. We usually reply within two business days.",
+    "contact_link": "Support & contact",
+    "office": "Office",
+    # apps
+    "apps_title": "Apps", "apps_desc": "Apps published by Division 11 Studios for iOS and Android.",
+    "apps_head_eyebrow": "Our apps", "apps_head_h1": "Apps by Division 11 Studios",
+    "apps_head_lead": "Everything we publish on the App Store and Google Play.",
+    "rated": "Rated", "details": "Details", "privacy_policy": "Privacy policy", "support": "Support",
+    "more_coming": "More titles are in development, including a multiplayer trivia game.",
+    "features": "Features", "f_platforms": "Platforms", "f_price": "Price", "f_age": "Age rating", "f_dev": "Developer",
+    "terms_of_use": "Terms of use", "get_support": "Get support", "policy_suffix": "privacy policy",
+    # about
+    "about_title": "About", "about_desc": "About Division 11 Studios, an independent software studio in Kuwait City.",
+    "about_eyebrow": "About", "about_h1": "About Division 11 Studios",
+    "about_lead": "Division 11 Studios is an independent software studio based in Kuwait City. We design, build and publish mobile apps and games for iPhone, iPad and Android, and we develop custom software and websites for clients.",
+    "about_p": "The studio was founded in 2026. Our apps are built with Flutter and Unity and released on both the Apple App Store and Google Play. Our first titles are {scorey}, a scorekeeper for traditional and modern card games, and {artnest}, a creative coloring and drawing app for the whole family.",
+    "values_h2": "What we care about",
+    "values": [
+        ("Fast and reliable", "Apps that open quickly, work offline where they can and stay out of your way."),
+        ("Private by default", "No accounts required. Game history and artwork stay on your device."),
+        ("Made for many languages", "Our apps and this site are built to support multiple languages, starting with English and Arabic."),
+    ],
+    # support
+    "support_title": "Support", "support_desc": "Support and contact for Division 11 Studios apps.",
+    "support_eyebrow": "Support", "support_h1": "How can we help?", "support_lead": "We usually reply within two business days.",
+    "contact_support": "Contact support",
+    "support_p1": "Email {email} and include the app name, your device model and what happened. Screenshots help.",
+    "support_p2": "For business enquiries, partnerships or client projects, write to {dev} or call {phone}.",
+    "faq_h2": "Common questions",
+    "faq": [
+        ("I bought “Remove Ads” but still see ads.", "Open the app’s settings and tap Restore purchases while signed in with the same Apple ID or Google account you used to buy it. If that doesn’t work, email us with your order receipt."),
+        ("How do I get a refund?", "Purchases are processed by Apple or Google. Request a refund at reportaproblem.apple.com (App Store) or through your Google Play order history."),
+        ("Where is my data stored? Can I delete it?", "Scorey game history and ArtNest artwork are stored only on your device. Delete them in the app, clear the app’s data, or uninstall the app. See each app’s privacy policy for details."),
+        ("Is ArtNest safe for children?", "ArtNest needs no account and places external links behind a parental gate."),
+    ],
+    "app_resources": "App resources", "about_app": "About the app",
+    # terms
+    "terms_title": "Terms of Use", "terms_desc": "Terms of use for Division 11 Studios apps and website.",
+    "legal_eyebrow": "Legal", "last_updated": "Last updated: " + UPDATED,
+    "terms_intro": "These terms apply to the apps published by Division 11 Studios (“we”, “us”) and to this website. By downloading or using our apps you agree to them.",
+    "terms_body": [
+        ("1. Licence", "We grant you a personal, non-exclusive, non-transferable licence to use our apps on devices you own or control, subject to these terms and to the Apple Media Services Terms or Google Play Terms of Service, as applicable. Apps downloaded from the App Store are also licensed under Apple’s Standard Licensed Application End User License Agreement."),
+        ("2. Purchases", "In-app purchases are sold and processed by Apple or Google. Prices, payment, refunds and restoration of purchases are handled under the store’s terms."),
+        ("3. Acceptable use", "You may not copy, modify, reverse-engineer, redistribute or tamper with our apps, bypass their security or advertising systems, or use them for any unlawful purpose."),
+        ("4. Advertising", "Some apps show advertisements provided by third-party networks. Their handling of data is described in each app’s privacy policy."),
+        ("5. Privacy", "How we handle information is described in each app’s privacy policy and in our website privacy notice."),
+        ("6. Intellectual property", "The apps, their content, names and logos are owned by Division 11 Studios or its licensors and are protected by law."),
+        ("7. Disclaimer and liability", "Our apps are provided “as is”. Scores, results and content are for entertainment and convenience. To the extent permitted by law, we are not liable for indirect or consequential loss arising from use of the apps."),
+        ("8. Changes", "We may update these terms. The current version is always published on this page."),
+        ("9. Governing law", "These terms are governed by the laws of the State of Kuwait."),
+        ("10. Contact", "Questions about these terms: {email}."),
+    ],
+    "translation_note": "",
+    # privacy
+    "privacy_title": "Privacy", "privacy_desc": "Privacy information for Division 11 Studios apps and website.",
+    "privacy_apps_h2": "App privacy policies",
+    "privacy_site_h2": "This website",
+    "privacy_site_p": "This website is a static site hosted on GitHub Pages. We do not use cookies, analytics or forms, and we do not collect personal information through it. Your language and theme choice is stored only in your browser. Our hosting provider may keep standard server logs (such as IP address and browser type) for security. Fonts are loaded from Google Fonts.",
+    "privacy_email_p": "If you email us, we use your message and address only to reply.",
+    "privacy_contact_h2": "Contact",
+    # 404
+    "nf_title": "Page not found", "nf_lead": "The page you’re looking for doesn’t exist.", "nf_home": "Go to the home page",
+},
+"ar": {
+    "brand": "ديفيجن 11 ستوديوز",
+    "legal": "شركة ديفيجن إيليفن ستوديوز لتصميم وبرمجة البرمجيات الخاصة ش.ش.و.",
+    "legal_note": "«ديفيجن 11 ستوديوز» هو الاسم التجاري لشركة ديفيجن إيليفن ستوديوز ش.ش.و.",
+    "addr": ["مبنى 9، شارع 133", "قطعة 1، النهضة", "مدينة الكويت، الكويت"],
+    "nav_home": "الرئيسية", "nav_apps": "التطبيقات", "nav_about": "من نحن", "nav_support": "الدعم",
+    "skip": "انتقل إلى المحتوى", "menu": "القائمة", "language": "اللغة",
+    "theme": "تبديل المظهر (النظام، فاتح، داكن)",
+    "tagline_footer": "تطبيقات وألعاب للأجهزة المحمولة، صُممت وطُوّرت في الكويت.",
+    "f_company": "الشركة", "f_address": "العنوان", "f_contact": "التواصل",
+    "privacy": "الخصوصية", "terms": "الشروط",
+    "rights": "جميع الحقوق محفوظة.",
+    "arrow": "←",
+    # home
+    "home_title": "ديفيجن 11 ستوديوز — تطبيقات وألعاب من الكويت",
+    "home_desc": "ديفيجن 11 ستوديوز استوديو مستقل لتطوير تطبيقات وألعاب الأجهزة المحمولة في الكويت، ومطوّر تطبيقي Scorey وArtNest.",
+    "hero_eyebrow": "استوديو تطبيقات مستقل · الكويت",
+    "hero_h1": "نصمم ونطوّر تطبيقات وألعاب يستخدمها الناس فعلاً.",
+    "hero_lead": "يطوّر استوديو ديفيجن 11 وينشر تطبيقات لأجهزة iPhone وiPad وAndroid — من أدوات الاستخدام اليومي إلى تطبيقات إبداعية للعائلة — كما ينفّذ برمجيات ومواقع إلكترونية حسب الطلب للعملاء.",
+    "cta_apps": "تطبيقاتنا", "cta_about": "عن الاستوديو",
+    "apps_eyebrow": "تطبيقات منشورة", "apps_h2": "متوفرة الآن على App Store وGoogle Play",
+    "what_eyebrow": "ماذا نقدّم", "what_h2": "تصميم البرمجيات وتطويرها",
+    "what": [
+        ("تطبيقات الجوال", "تطبيقات iOS وAndroid مبنية بتقنية Flutter، من النموذج الأولي حتى النشر في المتاجر والتحديثات والدعم."),
+        ("ألعاب وتجارب تفاعلية", "ألعاب خفيفة وإبداعية مبنية بمحرك Unity، مع اهتمام بالأداء وسهولة الاستخدام وملاءمتها للعائلة."),
+        ("المواقع الإلكترونية والصيانة", "تصميم المواقع وتطويرها وصيانة البرمجيات بشكل مستمر للشركات في الكويت والمنطقة."),
+    ],
+    "contact_eyebrow": "تواصل معنا", "contact_h2": "لديك سؤال أو مشروع؟",
+    "contact_p": "راسلنا بخصوص تطبيقاتنا أو الشراكات أو مشاريع البرمجيات الخاصة. نرد عادةً خلال يومي عمل.",
+    "contact_link": "الدعم والتواصل",
+    "office": "المكتب",
+    # apps
+    "apps_title": "التطبيقات", "apps_desc": "تطبيقات ديفيجن 11 ستوديوز لأجهزة iOS وAndroid.",
+    "apps_head_eyebrow": "تطبيقاتنا", "apps_head_h1": "تطبيقات ديفيجن 11 ستوديوز",
+    "apps_head_lead": "كل ما ننشره على App Store وGoogle Play.",
+    "rated": "التصنيف العمري", "details": "التفاصيل", "privacy_policy": "سياسة الخصوصية", "support": "الدعم",
+    "more_coming": "المزيد من التطبيقات قيد التطوير، منها لعبة أسئلة جماعية.",
+    "features": "المزايا", "f_platforms": "المنصات", "f_price": "السعر", "f_age": "التصنيف العمري", "f_dev": "المطوّر",
+    "terms_of_use": "شروط الاستخدام", "get_support": "الدعم", "policy_suffix": "— سياسة الخصوصية",
+    # about
+    "about_title": "من نحن", "about_desc": "تعرّف على ديفيجن 11 ستوديوز، استوديو برمجيات مستقل في مدينة الكويت.",
+    "about_eyebrow": "من نحن", "about_h1": "عن ديفيجن 11 ستوديوز",
+    "about_lead": "ديفيجن 11 ستوديوز استوديو برمجيات مستقل مقره مدينة الكويت. نصمم ونطوّر وننشر تطبيقات وألعاباً لأجهزة iPhone وiPad وAndroid، ونطوّر برمجيات ومواقع إلكترونية حسب الطلب للعملاء.",
+    "about_p": "تأسس الاستوديو عام 2026. نبني تطبيقاتنا باستخدام Flutter وUnity وننشرها على متجري Apple App Store وGoogle Play. أول إصداراتنا {scorey}، تطبيق لتسجيل نتائج ألعاب الورق التقليدية والحديثة، و{artnest}، تطبيق إبداعي للتلوين والرسم لكل أفراد العائلة.",
+    "values_h2": "ما يهمّنا",
+    "values": [
+        ("سرعة وموثوقية", "تطبيقات تفتح بسرعة، وتعمل دون اتصال حيثما أمكن، ولا تعيقك."),
+        ("الخصوصية أولاً", "لا حاجة لإنشاء حساب. سجل الألعاب والرسومات تبقى على جهازك."),
+        ("لغات متعددة", "تطبيقاتنا وهذا الموقع مصممة لدعم لغات متعددة، بدءاً بالعربية والإنجليزية."),
+    ],
+    # support
+    "support_title": "الدعم", "support_desc": "الدعم والتواصل لتطبيقات ديفيجن 11 ستوديوز.",
+    "support_eyebrow": "الدعم", "support_h1": "كيف يمكننا مساعدتك؟", "support_lead": "نرد عادةً خلال يومي عمل.",
+    "contact_support": "تواصل مع الدعم",
+    "support_p1": "راسلنا على {email} مع ذكر اسم التطبيق وطراز جهازك ووصف المشكلة. لقطات الشاشة تساعدنا كثيراً.",
+    "support_p2": "للاستفسارات التجارية والشراكات ومشاريع العملاء، راسلنا على {dev} أو اتصل على {phone}.",
+    "faq_h2": "أسئلة شائعة",
+    "faq": [
+        ("اشتريت «إزالة الإعلانات» وما زالت الإعلانات تظهر.", "افتح إعدادات التطبيق واضغط «استعادة المشتريات» وأنت مسجّل بنفس حساب Apple أو Google الذي استخدمته للشراء. إذا لم ينجح ذلك، راسلنا مع إيصال الشراء."),
+        ("كيف أسترد المبلغ؟", "تتم عمليات الشراء عبر Apple أو Google. اطلب الاسترداد من reportaproblem.apple.com (لمتجر App Store) أو من سجل الطلبات في Google Play."),
+        ("أين تُحفظ بياناتي؟ وهل يمكنني حذفها؟", "يُحفظ سجل ألعاب Scorey ورسومات ArtNest على جهازك فقط. يمكنك حذفها من داخل التطبيق أو بمسح بيانات التطبيق أو بحذفه. راجع سياسة الخصوصية لكل تطبيق للتفاصيل."),
+        ("هل تطبيق ArtNest آمن للأطفال؟", "لا يحتاج ArtNest إلى حساب، والروابط الخارجية فيه محمية ببوابة أبوية."),
+    ],
+    "app_resources": "روابط التطبيقات", "about_app": "عن التطبيق",
+    # terms
+    "terms_title": "شروط الاستخدام", "terms_desc": "شروط استخدام تطبيقات وموقع ديفيجن 11 ستوديوز.",
+    "legal_eyebrow": "قانوني", "last_updated": "آخر تحديث: 29 أكتوبر 2026",
+    "terms_intro": "تسري هذه الشروط على التطبيقات التي تنشرها ديفيجن 11 ستوديوز («نحن») وعلى هذا الموقع. بتنزيلك تطبيقاتنا أو استخدامها فإنك توافق عليها.",
+    "terms_body": [
+        ("1. الترخيص", "نمنحك ترخيصاً شخصياً وغير حصري وغير قابل للتحويل لاستخدام تطبيقاتنا على الأجهزة التي تملكها أو تتحكم بها، وفقاً لهذه الشروط ولشروط خدمات Apple أو شروط خدمة Google Play بحسب الحال. كما تخضع التطبيقات المنزّلة من App Store لاتفاقية ترخيص المستخدم النهائي القياسية من Apple."),
+        ("2. المشتريات", "تُباع المشتريات داخل التطبيق وتُعالج عبر Apple أو Google، وتخضع الأسعار والدفع والاسترداد واستعادة المشتريات لشروط المتجر."),
+        ("3. الاستخدام المقبول", "لا يجوز نسخ تطبيقاتنا أو تعديلها أو الهندسة العكسية لها أو إعادة توزيعها أو العبث بها أو تجاوز أنظمة الأمان أو الإعلانات فيها أو استخدامها لأي غرض غير مشروع."),
+        ("4. الإعلانات", "تعرض بعض التطبيقات إعلانات تقدمها شبكات خارجية، وتوضح سياسة الخصوصية لكل تطبيق كيفية تعاملها مع البيانات."),
+        ("5. الخصوصية", "توضح سياسة الخصوصية لكل تطبيق، وإشعار الخصوصية الخاص بالموقع، كيفية تعاملنا مع المعلومات."),
+        ("6. الملكية الفكرية", "التطبيقات ومحتواها وأسماؤها وشعاراتها مملوكة لديفيجن 11 ستوديوز أو للجهات المرخِّصة لها ومحمية بموجب القانون."),
+        ("7. إخلاء المسؤولية", "تُقدَّم تطبيقاتنا «كما هي». النتائج والمحتوى للترفيه والتيسير فقط. وفي الحدود التي يسمح بها القانون، لا نتحمل المسؤولية عن أي خسارة غير مباشرة أو تبعية ناتجة عن استخدام التطبيقات."),
+        ("8. التعديلات", "قد نحدّث هذه الشروط، وتُنشر النسخة السارية دائماً في هذه الصفحة."),
+        ("9. القانون الواجب التطبيق", "تخضع هذه الشروط لقوانين دولة الكويت."),
+        ("10. التواصل", "للاستفسار عن هذه الشروط: {email}."),
+    ],
+    "translation_note": "في حال وجود أي اختلاف بين النسختين العربية والإنجليزية من هذه الشروط، تُعتمد النسخة الإنجليزية.",
+    # privacy
+    "privacy_title": "الخصوصية", "privacy_desc": "معلومات الخصوصية لتطبيقات وموقع ديفيجن 11 ستوديوز.",
+    "privacy_apps_h2": "سياسات خصوصية التطبيقات",
+    "privacy_site_h2": "هذا الموقع",
+    "privacy_site_p": "هذا موقع ثابت مستضاف على GitHub Pages. لا نستخدم ملفات تعريف الارتباط أو أدوات التحليل أو النماذج، ولا نجمع أي معلومات شخصية من خلاله. يُحفظ اختيارك للغة والمظهر في متصفحك فقط. قد يحتفظ مزوّد الاستضافة بسجلات خادم اعتيادية (مثل عنوان IP ونوع المتصفح) لأغراض الأمان. تُحمَّل الخطوط من Google Fonts.",
+    "privacy_email_p": "إذا راسلتنا عبر البريد الإلكتروني، نستخدم رسالتك وعنوانك للرد عليك فقط.",
+    "privacy_contact_h2": "التواصل",
+    # 404
+    "nf_title": "الصفحة غير موجودة", "nf_lead": "الصفحة التي تبحث عنها غير موجودة.", "nf_home": "العودة إلى الرئيسية",
+},
+}
+
+# --------------------------------------------------------------------- apps
 APPS = [
     {
-        "slug": "scorey",
-        "name": "Scorey",
-        "tagline": "Digital card game scorecard",
-        "accent": "#FFBF00",
-        "bg": "#1C3156",
-        "mono": "S",
-        "category": "Utilities",
-        "platforms": "iPhone, iPad and Android",
-        "summary": "Scorey replaces pen and paper at the card table. Enter each round and it keeps the running totals, the history and the winner — fast, accurate and anonymous.",
-        "features": [
-            ("Instant calculation", "Enter points per round; Scorey handles the totals and shows a live preview of the running score."),
-            ("Many games built in", "Kout, Trix, Hand, Balot, Tarneeb, Sbeeta, Nthala, Domino, Rummy, Cribbage, Skyjo, Uno and a general scoresheet."),
-            ("Spectator mode", "Share a QR code so anyone on the same Wi-Fi can follow the scores live."),
-            ("Game history & sharing", "Every finished game is saved on the device and can be shared as a visual scorecard."),
-            ("Built-in rules", "Help guides with pictures explain each game's rules and scoring."),
-            ("English & Arabic", "Full bilingual interface, including Arabic-Indic numerals."),
-        ],
+        "slug": "scorey", "name": "Scorey", "icon": "scorey.png",
+        "accent": "#FFBF00", "bg": "#1C3156",
         "ios": "https://apps.apple.com/app/scorey/id6761244968",
         "android": "https://play.google.com/store/apps/details?id=com.division11.scorey",
-        "pricing": "Free with ads · optional one-time “Remove Ads” purchase",
         "age": "13+",
+        "text": {
+            "en": {
+                "tagline": "Digital card game scorecard", "category": "Utilities",
+                "platforms": "iPhone, iPad and Android",
+                "pricing": "Free with ads · optional one-time “Remove Ads” purchase",
+                "summary": "Scorey replaces pen and paper at the card table. Enter each round and it keeps the running totals, the history and the winner — fast, accurate and anonymous.",
+                "features": [
+                    ("Instant calculation", "Enter points per round; Scorey handles the totals and shows a live preview of the running score."),
+                    ("Many games built in", "Kout, Trix, Hand, Balot, Tarneeb, Sbeeta, Nthala, Domino, Rummy, Cribbage, Skyjo, Uno and a general scoresheet."),
+                    ("Spectator mode", "Share a QR code so anyone on the same Wi-Fi can follow the scores live."),
+                    ("Game history & sharing", "Every finished game is saved on the device and can be shared as a visual scorecard."),
+                    ("Built-in rules", "Help guides with pictures explain each game’s rules and scoring."),
+                    ("English & Arabic", "Full bilingual interface, including Arabic-Indic numerals."),
+                ],
+            },
+            "ar": {
+                "tagline": "سجل نتائج رقمي لألعاب الورق", "category": "أدوات",
+                "platforms": "iPhone وiPad وAndroid",
+                "pricing": "مجاني مع إعلانات · شراء اختياري لمرة واحدة «إزالة الإعلانات»",
+                "summary": "يغنيك Scorey عن الورقة والقلم على طاولة اللعب. أدخل نتيجة كل جولة ويتولى هو حساب المجموع والسجل والفائز — بسرعة ودقة ودون الحاجة لحساب.",
+                "features": [
+                    ("حساب فوري", "أدخل نقاط كل جولة ويحسب Scorey المجموع مع معاينة مباشرة للنتيجة."),
+                    ("ألعاب كثيرة مدمجة", "كوت، تركس، هند، بلوت، طرنيب، سبيتة، نذالة، دومينو، رومي، كريبج، سكاي جو، أونو، وورقة نتائج عامة."),
+                    ("وضع المتفرج", "شارك رمز QR ليتابع أي شخص على نفس شبكة Wi-Fi النتائج مباشرة."),
+                    ("سجل الألعاب والمشاركة", "تُحفظ كل لعبة منتهية على جهازك ويمكن مشاركتها كبطاقة نتائج مصوّرة."),
+                    ("شرح القوانين", "أدلة مصوّرة تشرح قوانين كل لعبة وطريقة احتساب نقاطها."),
+                    ("العربية والإنجليزية", "واجهة ثنائية اللغة بالكامل، مع دعم الأرقام العربية."),
+                ],
+            },
+        },
     },
     {
-        "slug": "artnest",
-        "name": "ArtNest",
-        "tagline": "Color, draw & imagine",
-        "accent": "#FF7A59",
-        "bg": "#2A1B5C",
-        "mono": "A",
-        "category": "Education",
-        "platforms": "iPhone, iPad and Android",
-        "summary": "ArtNest is a family-friendly creative studio with five ways to make art — from classic coloring pages to glowing neon drawings — in a safe, simple interface.",
-        "features": [
-            ("Coloring book", "A large library of outlines across many themes to build motor skills and color recognition."),
-            ("Color by number", "Follow the guide to reveal finished artworks — relaxing and educational."),
-            ("Pixel coloring", "Grid-based pixel art with hints and progress tracking."),
-            ("Glow drawing", "A neon canvas where every stroke lights up."),
-            ("Free drawing", "Brushes, glitter pens, magic markers and a big sticker collection."),
-            ("Gallery & parental gate", "Artwork saves to an in-app gallery or the device; external links sit behind a parental gate."),
-        ],
+        "slug": "artnest", "name": "ArtNest", "icon": "artnest.png",
+        "accent": "#FFC86B", "bg": "#2A1B5C",
         "ios": "https://apps.apple.com/app/artnest-color-and-fun/id6761441675",
         "android": "https://play.google.com/store/apps/details?id=com.division11.artnest",
-        "pricing": "Free · optional “Remove Ads” purchase",
         "age": "4+",
+        "text": {
+            "en": {
+                "tagline": "Color, draw & imagine", "category": "Education",
+                "platforms": "iPhone, iPad and Android",
+                "pricing": "Free · optional “Remove Ads” purchase",
+                "summary": "ArtNest is a family-friendly creative studio with five ways to make art — from classic coloring pages to glowing neon drawings — in a safe, simple interface.",
+                "features": [
+                    ("Coloring book", "A large library of outlines across many themes to build motor skills and color recognition."),
+                    ("Color by number", "Follow the guide to reveal finished artworks — relaxing and educational."),
+                    ("Pixel coloring", "Grid-based pixel art with hints and progress tracking."),
+                    ("Glow drawing", "A neon canvas where every stroke lights up."),
+                    ("Free drawing", "Brushes, glitter pens, magic markers and a big sticker collection."),
+                    ("Gallery & parental gate", "Artwork saves to an in-app gallery or the device; external links sit behind a parental gate."),
+                ],
+            },
+            "ar": {
+                "tagline": "لوّن وارسم وتخيّل", "category": "تعليم",
+                "platforms": "iPhone وiPad وAndroid",
+                "pricing": "مجاني · شراء اختياري «إزالة الإعلانات»",
+                "summary": "ArtNest مرسم إبداعي مناسب للعائلة يقدّم خمس طرق لصنع الفن — من صفحات التلوين الكلاسيكية إلى الرسم المضيء — بواجهة بسيطة وآمنة.",
+                "features": [
+                    ("كتاب التلوين", "مكتبة كبيرة من الرسومات بمواضيع متعددة تنمّي المهارات الحركية والتعرف على الألوان."),
+                    ("التلوين بالأرقام", "اتبع الأرقام لتكشف لوحات مكتملة — بطريقة ممتعة وتعليمية."),
+                    ("تلوين البكسل", "فن البكسل على شبكة مربعات مع تلميحات وتتبع للتقدم."),
+                    ("الرسم المضيء", "لوحة نيون تضيء فيها كل ضربة فرشاة."),
+                    ("الرسم الحر", "فُرش وأقلام لامعة وأقلام سحرية ومجموعة كبيرة من الملصقات."),
+                    ("المعرض والبوابة الأبوية", "تُحفظ الرسومات في معرض داخل التطبيق أو على الجهاز، والروابط الخارجية محمية ببوابة أبوية."),
+                ],
+            },
+        },
     },
 ]
 
-NAV = [("/", "Home"), ("/apps/", "Apps"), ("/about/", "About"), ("/support/", "Support")]
+# ------------------------------------------------------------------ helpers
+def t(lang, key):
+    return T.get(lang, {}).get(key, T[DEFAULT][key])
+
+def at(app, lang, key):
+    return app["text"].get(lang, {}).get(key, app["text"][DEFAULT][key])
 
 def esc(s):
-    return (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-def wordmark(light=False):
-    return ('<img class="logo logo-light" src="/assets/D11_Full_Logo_Color_On_Light.svg" alt="Division 11 Studios" width="146" height="35">'
-            '<img class="logo logo-dark" src="/assets/D11_Full_Logo_Color_On_Dark.svg" alt="Division 11 Studios" width="146" height="35">')
+def prefix(lang):
+    return next(l["prefix"] for l in LANGS if l["code"] == lang)
 
-def page(path, title, desc, body, active=None, hero=False):
-    nav = "".join(
-        f'<a href="{h}"{" aria-current=\"page\"" if h == active else ""}>{t}</a>' for h, t in NAV)
-    full_title = f"{title} · {CO['brand']}" if title else f"{CO['brand']} — Mobile apps & games from Kuwait"
-    addr = "<br>".join(CO["addr_lines"])
+def L(lang, path):
+    return prefix(lang) + path
+
+def ltr(s):
+    return f'<bdi class="ltr">{s}</bdi>'
+
+def mail(addr):
+    return f'<a href="mailto:{addr}">{ltr(addr)}</a>'
+
+def tel():
+    return f'<a href="tel:{CO["phone_href"]}">{ltr(CO["phone"])}</a>'
+
+def icon_html(app, size="lg"):
+    if os.path.exists(os.path.join(ROOT, "brand", "apps", app["icon"])):
+        return f'<img class="appicon {size}" src="/assets/apps/{app["icon"]}" alt="" width="120" height="120" loading="lazy">'
+    return f'<div class="appicon mono {size}" style="--a:{app["accent"]};--b:{app["bg"]}" aria-hidden="true">{app["name"][0]}</div>'
+
+def store_buttons(app, lang, cls=""):
+    apple = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.5-1-2.4-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>'
+    play = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.6 2.3c-.3.3-.4.7-.4 1.2v17c0 .5.1.9.4 1.2l9.5-9.7-9.5-9.7zm10.6 10.8 2.6 2.6-11.2 6.4 8.6-9zm0-2.2-8.6-9 11.2 6.4-2.6 2.6zm3.9-2 3 1.7c.9.5.9 1.3 0 1.8l-3 1.7-2.8-2.6 2.8-2.6z"/></svg>'
+    # Store badge wording stays in English: Apple and Google require their official badge text.
+    return (f'<div class="stores {cls}">'
+            f'<a class="store" href="{app["ios"]}" rel="noopener">{apple}<span><small>Download on the</small>App Store</span></a>'
+            f'<a class="store" href="{app["android"]}" rel="noopener">{play}<span><small>Get it on</small>Google Play</span></a>'
+            f'</div>')
+
+ICON_GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>'
+ICON_AUTO = '<svg class="theme-ico-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></svg>'
+ICON_SUN = '<svg class="theme-ico-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+ICON_MOON = '<svg class="theme-ico-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'
+
+THEME_BOOT = "(function(){try{var t=localStorage.getItem('d11-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();"
+THEME_TOGGLE = ("function d11Theme(){var r=document.documentElement,c=r.getAttribute('data-theme'),"
+                "n=c===null?'light':c==='light'?'dark':null;"
+                "if(n)r.setAttribute('data-theme',n);else r.removeAttribute('data-theme');"
+                "try{n?localStorage.setItem('d11-theme',n):localStorage.removeItem('d11-theme')}catch(e){}}")
+
+def logos():
+    return ('<img class="logo logo-light" src="/assets/D11_Full_Logo_Color_On_Light.svg" alt="Division 11 Studios" width="167" height="40">'
+            '<img class="logo logo-dark" src="/assets/D11_Full_Logo_Color_On_Dark.svg" alt="Division 11 Studios" width="167" height="40">')
+
+PAGES = []  # (lang, path) for the sitemap
+
+def write(lang, path, html):
+    rel = L(lang, path).strip("/")
+    out = os.path.join(OUT, rel, "index.html") if path != "/404" else os.path.join(OUT, "404.html")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(html)
+    if path != "/404":
+        PAGES.append((lang, path))
+
+def page(lang, path, title, desc, body, active=None, hero=False):
+    d = next(l for l in LANGS if l["code"] == lang)
+    nav_items = [("/", "nav_home"), ("/apps/", "nav_apps"), ("/about/", "nav_about"), ("/support/", "nav_support")]
+    nav = "".join(f'<a href="{L(lang, h)}"{" aria-current=\"page\"" if h == active else ""}>{t(lang, k)}</a>' for h, k in nav_items)
+    langs_menu = "".join(
+        f'<a href="{L(l["code"], path)}" hreflang="{l["code"]}" lang="{l["code"]}"{" aria-current=\"true\"" if l["code"] == lang else ""}>{l["name"]}</a>'
+        for l in LANGS)
+    alternates = "".join(f'<link rel="alternate" hreflang="{l["code"]}" href="{SITE}{L(l["code"], path)}">\n' for l in LANGS)
+    alternates += f'<link rel="alternate" hreflang="x-default" href="{SITE}{path}">\n'
+    full_title = f"{title} · {t(lang, 'brand')}" if title else t(lang, "home_title")
+    ld = {"@context": "https://schema.org", "@type": "Organization", "name": T["en"]["brand"],
+          "alternateName": T["ar"]["brand"], "legalName": T["en"]["legal"], "url": SITE,
+          "logo": SITE + "/assets/apple-touch-icon.png", "email": CO["support"], "telephone": CO["phone_href"],
+          "foundingDate": "2026",
+          "address": {"@type": "PostalAddress", "streetAddress": "Building 9, Street 133, Block 1",
+                      "addressLocality": "Al Nahda, Kuwait City", "addressCountry": "KW"},
+          "sameAs": [CO["instagram"], CO["tiktok"]]}
+    fonts = "family=Inter:wght@400;500;600&family=Sora:wght@500;600;700"
+    if lang == "ar":
+        fonts += "&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700"
     html = f"""<!doctype html>
-<html lang="en">
+<html lang="{lang}" dir="{d['dir']}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(full_title)}</title>
+<script>{THEME_BOOT}</script>
 <meta name="description" content="{esc(desc)}">
-<link rel="canonical" href="https://www.division11studios.com{path}">
-<meta property="og:title" content="{esc(full_title)}">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="{SITE}{L(lang, path)}">
+{alternates}<meta property="og:title" content="{esc(full_title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.division11studios.com{path}">
+<meta property="og:url" content="{SITE}{L(lang, path)}">
+<meta property="og:image" content="{SITE}/assets/apple-touch-icon.png">
+<meta property="og:locale" content="{'ar_KW' if lang == 'ar' else 'en_US'}">
 <meta name="theme-color" content="#0A0630">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?{fonts}&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
-<script type="application/ld+json">
-{{"@context":"https://schema.org","@type":"Organization","name":"{CO['brand']}","legalName":"{CO['legal']}","url":"https://www.division11studios.com","email":"{CO['support']}","telephone":"{CO['phone_href']}","foundingDate":"{CO['founded']}","address":{{"@type":"PostalAddress","streetAddress":"Building 9, Street 133, Block 1","addressLocality":"Al Nahda, Kuwait City","addressCountry":"KW"}},"sameAs":["{CO['instagram']}","{CO['tiktok']}"]}}
-</script>
+<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main">{t(lang, 'skip')}</a>
 <header class="site-header{' on-dark' if hero else ''}">
   <div class="wrap bar">
-    <a class="brand" href="/" aria-label="{CO['brand']} home">{wordmark()}</a>
-    <input type="checkbox" id="navtoggle" class="navtoggle" aria-label="Menu">
+    <a class="brand" href="{L(lang, '/')}" aria-label="{t(lang, 'brand')}">{logos()}</a>
+    <input type="checkbox" id="navtoggle" class="navtoggle" aria-label="{t(lang, 'menu')}">
+    <nav class="nav" aria-label="{t(lang, 'menu')}">{nav}</nav>
+    <div class="tools">
+      <details class="lang"><summary class="tool" aria-label="{t(lang, 'language')}">{ICON_GLOBE}<span class="tool-label">{d['name']}</span></summary><div class="lang-menu">{langs_menu}</div></details>
+      <button class="tool" type="button" onclick="d11Theme()" aria-label="{t(lang, 'theme')}" title="{t(lang, 'theme')}">{ICON_AUTO}{ICON_SUN}{ICON_MOON}</button>
+    </div>
     <label for="navtoggle" class="burger" aria-hidden="true"><span></span><span></span><span></span></label>
-    <nav class="nav" aria-label="Main">{nav}</nav>
   </div>
 </header>
 <main id="main">
@@ -128,281 +432,244 @@ def page(path, title, desc, body, active=None, hero=False):
 <footer class="site-footer">
   <div class="wrap foot-grid">
     <div>
-      <div class="foot-brand">{wordmark()}</div>
-      <p class="muted small">Mobile apps and games, designed and built in Kuwait.</p>
-      <p class="social small"><a href="{CO['instagram']}" rel="noopener">Instagram</a> · <a href="{CO['tiktok']}" rel="noopener">TikTok</a></p>
+      <div class="foot-brand">{logos()}</div>
+      <p class="muted small">{t(lang, 'tagline_footer')}</p>
+      <p class="small"><a href="{CO['instagram']}" rel="noopener">Instagram</a> · <a href="{CO['tiktok']}" rel="noopener">TikTok</a></p>
     </div>
     <div>
-      <h3>Company</h3>
-      <p class="small">{esc(CO['legal'])}<br>{CO['form']}<br>Commercial Registration No. {CO['cr']}</p>
+      <h3>{t(lang, 'f_company')}</h3>
+      <p class="small">{esc(t(lang, 'legal'))}</p>
     </div>
     <div>
-      <h3>Address</h3>
-      <p class="small">{addr}</p>
+      <h3>{t(lang, 'f_address')}</h3>
+      <p class="small">{'<br>'.join(t(lang, 'addr'))}</p>
     </div>
     <div>
-      <h3>Contact</h3>
-      <p class="small"><a href="mailto:{CO['support']}">{CO['support']}</a><br><a href="tel:{CO['phone_href']}">{CO['phone']}</a></p>
-      <p class="small"><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
+      <h3>{t(lang, 'f_contact')}</h3>
+      <p class="small">{mail(CO['support'])}<br>{tel()}</p>
+      <p class="small"><a href="{L(lang, '/privacy/')}">{t(lang, 'privacy')}</a> · <a href="{L(lang, '/terms/')}">{t(lang, 'terms')}</a></p>
     </div>
   </div>
-  <div class="wrap legal-line small">© {CO['founded']} {esc(CO['legal'])}. All rights reserved. “Division 11 Studios” is the trading name of {esc(CO['legal_short'])}</div>
+  <div class="wrap legal-line small">© 2026 {esc(t(lang, 'legal').rstrip('.'))}. {t(lang, 'rights')} {esc(t(lang, 'legal_note'))}</div>
 </footer>
+<script>{THEME_TOGGLE}</script>
 </body>
 </html>
 """
-    out = os.path.join(OUT, path.strip("/"), "index.html") if path != "/404" else os.path.join(OUT, "404.html")
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w", encoding="utf-8") as f:
-        f.write(html)
+    write(lang, path, html)
 
-def store_buttons(a, cls=""):
-    return f"""<div class="stores {cls}">
-  <a class="store" href="{a['ios']}" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.5-1-2.4-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg><span><small>Download on the</small>App Store</span></a>
-  <a class="store" href="{a['android']}" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.6 2.3c-.3.3-.4.7-.4 1.2v17c0 .5.1.9.4 1.2l9.5-9.7-9.5-9.7zm10.6 10.8 2.6 2.6-11.2 6.4 8.6-9zm0-2.2-8.6-9 11.2 6.4-2.6 2.6zm3.9-2 3 1.7c.9.5.9 1.3 0 1.8l-3 1.7-2.8-2.6 2.8-2.6z"/></svg><span><small>Get it on</small>Google Play</span></a>
-</div>"""
-
-def app_icon(a, size="lg"):
-    return f'<div class="appicon {size}" style="--a:{a["accent"]};--b:{a["bg"]}" aria-hidden="true">{a["mono"]}</div>'
-
-# ---------- Home
-def home():
+# -------------------------------------------------------------------- pages
+def home(lang):
     cards = "".join(f"""
     <article class="app-card">
-      {app_icon(a)}
+      {icon_html(a)}
       <div>
-        <h3><a href="/{a['slug']}/">{a['name']}</a></h3>
-        <p class="tag">{a['tagline']}</p>
-        <p>{a['summary']}</p>
-        <p class="meta small">{a['category']} · {a['platforms']}</p>
-        {store_buttons(a, 'compact')}
+        <h3><a href="{L(lang, '/' + a['slug'] + '/')}">{a['name']}</a></h3>
+        <p class="tag">{at(a, lang, 'tagline')}</p>
+        <p>{at(a, lang, 'summary')}</p>
+        <p class="meta small">{at(a, lang, 'category')} · {at(a, lang, 'platforms')}</p>
+        {store_buttons(a, lang, 'compact')}
       </div>
     </article>""" for a in APPS)
+    what = "".join(f'<div class="feature"><h3>{h}</h3><p>{p}</p></div>' for h, p in t(lang, "what"))
     body = f"""
 <section class="hero">
   <div class="wrap hero-inner">
-    <p class="eyebrow">Independent app studio · Kuwait</p>
-    <h1>We design and build mobile apps and games people actually use.</h1>
-    <p class="lead">{CO['brand']} develops and publishes apps for iPhone, iPad and Android — from everyday utilities to creative tools for families — and builds custom software and websites for clients.</p>
-    <div class="cta"><a class="btn primary" href="/apps/">See our apps</a><a class="btn ghost" href="/about/">About the company</a></div>
+    <p class="eyebrow">{t(lang, 'hero_eyebrow')}</p>
+    <h1>{t(lang, 'hero_h1')}</h1>
+    <p class="lead">{t(lang, 'hero_lead')}</p>
+    <div class="cta"><a class="btn primary" href="{L(lang, '/apps/')}">{t(lang, 'cta_apps')}</a><a class="btn ghost" href="{L(lang, '/about/')}">{t(lang, 'cta_about')}</a></div>
   </div>
 </section>
-
 <section class="section">
   <div class="wrap">
-    <div class="section-head"><p class="eyebrow">Published apps</p><h2>Available now on the App Store and Google Play</h2></div>
+    <div class="section-head"><p class="eyebrow">{t(lang, 'apps_eyebrow')}</p><h2>{t(lang, 'apps_h2')}</h2></div>
     <div class="app-grid">{cards}
     </div>
   </div>
 </section>
-
 <section class="section tint">
   <div class="wrap">
-    <div class="section-head"><p class="eyebrow">What we do</p><h2>Software design and development</h2></div>
-    <div class="three">
-      <div class="feature"><h3>Mobile apps</h3><p>Native-quality apps for iOS and Android built with Flutter, from first prototype to store release, updates and support.</p></div>
-      <div class="feature"><h3>Games & interactive</h3><p>Casual and creative games built in Unity, with attention to performance, accessibility and family-safe design.</p></div>
-      <div class="feature"><h3>Websites & maintenance</h3><p>Website design, development and ongoing software maintenance for businesses in Kuwait and the region.</p></div>
-    </div>
+    <div class="section-head"><p class="eyebrow">{t(lang, 'what_eyebrow')}</p><h2>{t(lang, 'what_h2')}</h2></div>
+    <div class="three">{what}</div>
   </div>
 </section>
-
 <section class="section">
-  <div class="wrap company-strip">
+  <div class="wrap contact-strip">
     <div>
-      <p class="eyebrow">The company</p>
-      <h2>{esc(CO['legal'])}</h2>
-      <p>A Single Person Company (S.P.C.) registered with the Kuwait Ministry of Commerce and Industry, Commercial Registration No. {CO['cr']}, trading as {CO['brand']}.</p>
-      <a class="textlink" href="/about/">More about us →</a>
+      <p class="eyebrow">{t(lang, 'contact_eyebrow')}</p>
+      <h2>{t(lang, 'contact_h2')}</h2>
+      <p>{t(lang, 'contact_p')}</p>
+      <a class="textlink" href="{L(lang, '/support/')}">{t(lang, 'contact_link')} {t(lang, 'arrow')}</a>
     </div>
     <address>
-      <strong>Office</strong><br>{'<br>'.join(CO['addr_lines'])}<br><br>
-      <a href="mailto:{CO['support']}">{CO['support']}</a><br>
-      <a href="tel:{CO['phone_href']}">{CO['phone']}</a>
+      <strong>{t(lang, 'office')}</strong><br>{'<br>'.join(t(lang, 'addr'))}<br><br>
+      {mail(CO['support'])}<br>{tel()}
     </address>
   </div>
-</section>
-"""
-    page("/", "", f"{CO['brand']} is an independent mobile app and game studio in Kuwait, makers of Scorey and ArtNest.", body, active="/", hero=True)
+</section>"""
+    page(lang, "/", "", t(lang, "home_desc"), body, active="/", hero=True)
 
-# ---------- Apps list
-def apps_page():
+def apps_page(lang):
     rows = "".join(f"""
     <article class="app-row">
-      {app_icon(a)}
-      <div class="app-row-body">
-        <h2><a href="/{a['slug']}/">{a['name']}</a> <span class="tag">— {a['tagline']}</span></h2>
-        <p>{a['summary']}</p>
-        <p class="meta small">{a['category']} · {a['platforms']} · Rated {a['age']} · {a['pricing']}</p>
-        {store_buttons(a)}
-        <p class="small links"><a href="/{a['slug']}/">Details</a> · <a href="/{a['slug']}/privacy/">Privacy policy</a> · <a href="/support/">Support</a></p>
+      {icon_html(a)}
+      <div>
+        <h2><a href="{L(lang, '/' + a['slug'] + '/')}">{a['name']}</a> <span class="tag">— {at(a, lang, 'tagline')}</span></h2>
+        <p>{at(a, lang, 'summary')}</p>
+        <p class="meta small">{at(a, lang, 'category')} · {at(a, lang, 'platforms')} · {t(lang, 'rated')} {ltr(a['age'])} · {at(a, lang, 'pricing')}</p>
+        {store_buttons(a, lang)}
+        <p class="small"><a href="{L(lang, '/' + a['slug'] + '/')}">{t(lang, 'details')}</a> · <a href="/{a['slug']}/privacy/">{t(lang, 'privacy_policy')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'support')}</a></p>
       </div>
     </article>""" for a in APPS)
     body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">Our apps</p><h1>Apps by {CO['brand']}</h1><p class="lead">Everything we publish on the App Store and Google Play.</p></div></section>
+<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'apps_head_eyebrow')}</p><h1>{t(lang, 'apps_head_h1')}</h1><p class="lead">{t(lang, 'apps_head_lead')}</p></div></section>
 <section class="section"><div class="wrap app-list">{rows}
-<p class="muted">More titles are in development, including a multiplayer trivia game.</p>
+<p class="muted">{t(lang, 'more_coming')}</p>
 </div></section>"""
-    page("/apps/", "Apps", f"Apps published by {CO['brand']}: Scorey and ArtNest for iOS and Android.", body, active="/apps/")
+    page(lang, "/apps/", t(lang, "apps_title"), t(lang, "apps_desc"), body, active="/apps/")
 
-# ---------- App detail
-def app_page(a):
-    feats = "".join(f'<div class="feature"><h3>{t}</h3><p>{d}</p></div>' for t, d in a["features"])
+def app_page(lang, a):
+    feats = "".join(f'<div class="feature"><h3>{h}</h3><p>{p}</p></div>' for h, p in at(a, lang, "features"))
     body = f"""
 <section class="app-hero" style="--a:{a['accent']};--b:{a['bg']}">
   <div class="wrap app-hero-inner">
-    {app_icon(a, 'xl')}
+    {icon_html(a, 'xl')}
     <div>
-      <p class="eyebrow">{a['category']}</p>
+      <p class="eyebrow">{at(a, lang, 'category')}</p>
       <h1>{a['name']}</h1>
-      <p class="lead">{a['tagline']}</p>
-      {store_buttons(a)}
+      <p class="lead">{at(a, lang, 'tagline')}</p>
+      {store_buttons(a, lang)}
     </div>
   </div>
 </section>
-<section class="section"><div class="wrap narrow"><p class="lead dark">{a['summary']}</p></div></section>
-<section class="section tint"><div class="wrap"><div class="section-head"><h2>Features</h2></div><div class="three">{feats}</div></div></section>
+<section class="section"><div class="wrap narrow"><p class="lead dark">{at(a, lang, 'summary')}</p></div></section>
+<section class="section tint"><div class="wrap"><div class="section-head"><h2>{t(lang, 'features')}</h2></div><div class="three">{feats}</div></div></section>
 <section class="section"><div class="wrap">
   <dl class="facts">
-    <div><dt>Platforms</dt><dd>{a['platforms']}</dd></div>
-    <div><dt>Price</dt><dd>{a['pricing']}</dd></div>
-    <div><dt>Age rating</dt><dd>{a['age']}</dd></div>
-    <div><dt>Developer</dt><dd>{CO['brand']}</dd></div>
+    <div><dt>{t(lang, 'f_platforms')}</dt><dd>{at(a, lang, 'platforms')}</dd></div>
+    <div><dt>{t(lang, 'f_price')}</dt><dd>{at(a, lang, 'pricing')}</dd></div>
+    <div><dt>{t(lang, 'f_age')}</dt><dd>{ltr(a['age'])}</dd></div>
+    <div><dt>{t(lang, 'f_dev')}</dt><dd>{t(lang, 'brand')}</dd></div>
   </dl>
-  <p class="small links"><a href="/{a['slug']}/privacy/">{a['name']} privacy policy</a> · <a href="/terms/">Terms of use</a> · <a href="/support/">Get support</a></p>
+  <p class="small"><a href="/{a['slug']}/privacy/">{a['name']} {t(lang, 'policy_suffix')}</a> · <a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a> · <a href="{L(lang, '/support/')}">{t(lang, 'get_support')}</a></p>
 </div></section>"""
-    page(f"/{a['slug']}/", a["name"], f"{a['name']} by {CO['brand']} — {a['tagline']}. {a['summary']}", body, active="/apps/")
+    page(lang, f"/{a['slug']}/", a["name"], f"{a['name']} — {at(a, lang, 'tagline')}. {at(a, lang, 'summary')}", body, active="/apps/")
 
-# ---------- About
-def about():
+def about(lang):
+    links = {a["slug"]: f'<a href="{L(lang, "/" + a["slug"] + "/")}">{a["name"]}</a>' for a in APPS}
+    values = "".join(f'<div class="feature"><h3>{h}</h3><p>{p}</p></div>' for h, p in t(lang, "values"))
     body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">About</p><h1>About {CO['brand']}</h1></div></section>
+<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'about_eyebrow')}</p><h1>{t(lang, 'about_h1')}</h1></div></section>
+<section class="section"><div class="wrap narrow">
+  <p class="lead dark">{t(lang, 'about_lead')}</p>
+  <p>{t(lang, 'about_p').format(**links)}</p>
+</div></section>
+<section class="section tint"><div class="wrap"><div class="section-head"><h2>{t(lang, 'values_h2')}</h2></div><div class="three">{values}</div></div></section>"""
+    page(lang, "/about/", t(lang, "about_title"), t(lang, "about_desc"), body, active="/about/")
+
+def support(lang):
+    faq = "".join(f'<details class="faq"><summary>{q}</summary><p>{a}</p></details>' for q, a in t(lang, "faq"))
+    res = "".join(f'<p><strong>{a["name"]}</strong><br><a href="{L(lang, "/" + a["slug"] + "/")}">{t(lang, "about_app")}</a> · <a href="/{a["slug"]}/privacy/">{t(lang, "privacy_policy")}</a></p>' for a in APPS)
+    body = f"""
+<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'support_eyebrow')}</p><h1>{t(lang, 'support_h1')}</h1><p class="lead">{t(lang, 'support_lead')}</p></div></section>
 <section class="section"><div class="wrap two">
   <div class="prose">
-    <p class="lead dark">{CO['brand']} is an independent software studio based in Kuwait City. We design, build and publish mobile apps and games for iPhone, iPad and Android, and we develop custom software and websites for clients.</p>
-    <p>The studio was founded in {CO['founded']} by {CO['ceo']}, who leads design and development. Our apps are built in Flutter and Unity and are released on both the Apple App Store and Google Play. Our first titles are <a href="/scorey/">Scorey</a>, a scorekeeper for traditional and modern card games, and <a href="/artnest/">ArtNest</a>, a creative coloring and drawing app for the whole family.</p>
-    <p>We care about apps that are fast, respectful of privacy and work in both English and Arabic. Game history and artwork stay on your device, and we don’t require accounts.</p>
-    <h2>Licensed activities</h2>
-    <ul>
-      <li>Software design and programming (application development)</li>
-      <li>Website design</li>
-      <li>Software maintenance and web page design</li>
-    </ul>
+    <h2>{t(lang, 'contact_support')}</h2>
+    <p>{t(lang, 'support_p1').format(email=mail(CO['support']))}</p>
+    <p>{t(lang, 'support_p2').format(dev=mail(CO['dev']), phone=tel())}</p>
+    <h2>{t(lang, 'faq_h2')}</h2>
+    {faq}
   </div>
   <aside class="card">
-    <h2>Company details</h2>
-    <dl class="kv">
-      <dt>Legal name</dt><dd>{esc(CO['legal'])}</dd>
-      <dt>Arabic name</dt><dd lang="ar" dir="rtl">{CO['legal_ar']}</dd>
-      <dt>Trading name</dt><dd>{CO['brand']}</dd>
-      <dt>Legal form</dt><dd>{CO['form']}</dd>
-      <dt>Commercial Registration</dt><dd>No. {CO['cr']} — Kuwait Ministry of Commerce and Industry</dd>
-      <dt>Established</dt><dd>{CO['founded']}</dd>
-      <dt>CEO</dt><dd>{CO['ceo']}</dd>
-      <dt>Address</dt><dd>{'<br>'.join(CO['addr_lines'])}</dd>
-      <dt>Email</dt><dd><a href="mailto:{CO['dev']}">{CO['dev']}</a></dd>
-      <dt>Phone</dt><dd><a href="tel:{CO['phone_href']}">{CO['phone']}</a></dd>
-    </dl>
+    <h2>{t(lang, 'app_resources')}</h2>
+    {res}
+    <p><a href="{L(lang, '/terms/')}">{t(lang, 'terms_of_use')}</a></p>
   </aside>
 </div></section>"""
-    page("/about/", "About", f"About {CO['legal']} ({CO['brand']}), a software studio in Kuwait City.", body, active="/about/")
+    page(lang, "/support/", t(lang, "support_title"), t(lang, "support_desc"), body, active="/support/")
 
-# ---------- Support
-def support():
+def terms(lang):
+    secs = "".join(f"<h2>{h}</h2><p>{p.format(email=mail(CO['support']))}</p>" for h, p in t(lang, "terms_body"))
+    note = f'<p class="muted small">{t(lang, "translation_note")}</p>' if t(lang, "translation_note") else ""
     body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">Support</p><h1>How can we help?</h1><p class="lead">We usually reply within two business days.</p></div></section>
-<section class="section"><div class="wrap two">
-  <div class="prose">
-    <h2>Contact support</h2>
-    <p>Email <a href="mailto:{CO['support']}">{CO['support']}</a> and include the app name, your device model and what happened. Screenshots help.</p>
-    <p>For business enquiries, partnerships or client projects, write to <a href="mailto:{CO['dev']}">{CO['dev']}</a> or call <a href="tel:{CO['phone_href']}">{CO['phone']}</a>.</p>
-    <h2>Common questions</h2>
-    <details><summary>I bought “Remove Ads” but still see ads.</summary><p>Open the app’s settings and tap <em>Restore purchases</em> while signed in with the same Apple ID or Google account you used to buy it. If that doesn’t work, email us with your order receipt.</p></details>
-    <details><summary>How do I get a refund?</summary><p>Purchases are processed by Apple or Google. Request a refund at <a href="https://reportaproblem.apple.com" rel="noopener">reportaproblem.apple.com</a> (App Store) or through your Google Play order history.</p></details>
-    <details><summary>Where is my data stored? Can I delete it?</summary><p>Scorey game history and ArtNest artwork are stored only on your device. Delete them in the app, clear the app’s data, or uninstall the app. See each app’s privacy policy for details.</p></details>
-    <details><summary>Is ArtNest safe for children?</summary><p>ArtNest needs no account, collects no personal information and places external links behind a parental gate.</p></details>
-  </div>
-  <aside class="card">
-    <h2>App resources</h2>
-    {''.join(f'<p><strong>{a["name"]}</strong><br><a href="/{a["slug"]}/">About the app</a> · <a href="/{a["slug"]}/privacy/">Privacy policy</a></p>' for a in APPS)}
-    <p><a href="/terms/">Terms of use</a></p>
-  </aside>
-</div></section>"""
-    page("/support/", "Support", f"Support and contact for {CO['brand']} apps.", body, active="/support/")
-
-# ---------- Terms
-def terms():
-    body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">Legal</p><h1>Terms of Use</h1><p class="muted">Last updated: 29 October 2026</p></div></section>
+<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'legal_eyebrow')}</p><h1>{t(lang, 'terms_title')}</h1><p class="muted">{t(lang, 'last_updated')}</p></div></section>
 <section class="section"><div class="wrap narrow prose">
-<p>These terms apply to the apps published by {esc(CO['legal'])} (“{CO['brand']}”, “we”, “us”) and to this website. By downloading or using our apps you agree to them.</p>
-<h2>1. Licence</h2><p>We grant you a personal, non-exclusive, non-transferable licence to use our apps on devices you own or control, subject to these terms and to the Apple Media Services Terms or Google Play Terms of Service, as applicable. Apps downloaded from the App Store are also licensed under Apple’s Standard Licensed Application End User License Agreement.</p>
-<h2>2. Purchases</h2><p>In-app purchases are sold and processed by Apple or Google. Prices, payment, refunds and restoration of purchases are handled under the store’s terms.</p>
-<h2>3. Acceptable use</h2><p>You may not copy, modify, reverse-engineer, redistribute or tamper with our apps, bypass their security or advertising systems, or use them for any unlawful purpose.</p>
-<h2>4. Advertising</h2><p>Some apps show advertisements provided by third-party networks. Their handling of data is described in each app’s privacy policy.</p>
-<h2>5. Privacy</h2><p>How we handle information is described in the privacy policy for each app: <a href="/scorey/privacy/">Scorey</a>, <a href="/artnest/privacy/">ArtNest</a>, and for this website in our <a href="/privacy/">website privacy notice</a>.</p>
-<h2>6. Intellectual property</h2><p>The apps, their content, names and logos are owned by {CO['brand']} or its licensors and are protected by law.</p>
-<h2>7. Disclaimer and liability</h2><p>Our apps are provided “as is”. Scores, results and content are for entertainment and convenience. To the extent permitted by law, we are not liable for indirect or consequential loss arising from use of the apps.</p>
-<h2>8. Changes</h2><p>We may update these terms. The current version is always published on this page.</p>
-<h2>9. Governing law</h2><p>These terms are governed by the laws of the State of Kuwait.</p>
-<h2>10. Contact</h2><p>{esc(CO['legal'])}, {', '.join(CO['addr_lines'])}. Email <a href="mailto:{CO['support']}">{CO['support']}</a>.</p>
+<p>{t(lang, 'terms_intro')}</p>
+{secs}
+{note}
 </div></section>"""
-    page("/terms/", "Terms of Use", f"Terms of use for {CO['brand']} apps and website.", body)
+    page(lang, "/terms/", t(lang, "terms_title"), t(lang, "terms_desc"), body)
 
-# ---------- Website privacy
-def privacy():
+def privacy(lang):
+    items = "".join(f'<li><a href="/{a["slug"]}/privacy/">{a["name"]} — {t(lang, "privacy_policy")}</a></li>' for a in APPS)
     body = f"""
-<section class="page-head"><div class="wrap"><p class="eyebrow">Legal</p><h1>Privacy</h1><p class="muted">Last updated: 29 October 2026</p></div></section>
+<section class="page-head"><div class="wrap"><p class="eyebrow">{t(lang, 'legal_eyebrow')}</p><h1>{t(lang, 'privacy_title')}</h1><p class="muted">{t(lang, 'last_updated')}</p></div></section>
 <section class="section"><div class="wrap narrow prose">
-<h2>App privacy policies</h2>
-<ul>{''.join(f'<li><a href="/{a["slug"]}/privacy/">{a["name"]} privacy policy</a></li>' for a in APPS)}</ul>
-<h2>This website</h2>
-<p>This website is a static site hosted on GitHub Pages. We do not use cookies, analytics or forms here, and we do not collect personal information through it. Our hosting provider may keep standard server logs (such as IP address and browser type) for security. Fonts are loaded from Google Fonts.</p>
-<p>If you email us, we use your message and address only to reply.</p>
-<h2>Contact</h2>
-<p>{esc(CO['legal'])}, {', '.join(CO['addr_lines'])} — <a href="mailto:{CO['support']}">{CO['support']}</a></p>
+<h2>{t(lang, 'privacy_apps_h2')}</h2>
+<ul>{items}</ul>
+<h2>{t(lang, 'privacy_site_h2')}</h2>
+<p>{t(lang, 'privacy_site_p')}</p>
+<p>{t(lang, 'privacy_email_p')}</p>
+<h2>{t(lang, 'privacy_contact_h2')}</h2>
+<p>{mail(CO['support'])}</p>
 </div></section>"""
-    page("/privacy/", "Privacy", f"Privacy information for {CO['brand']} apps and website.", body)
+    page(lang, "/privacy/", t(lang, "privacy_title"), t(lang, "privacy_desc"), body)
 
 def notfound():
-    body = """<section class="page-head"><div class="wrap"><p class="eyebrow">404</p><h1>Page not found</h1><p class="lead">The page you’re looking for doesn’t exist. <a href="/">Go to the home page</a>.</p></div></section>"""
-    page("/404", "Not found", "Page not found.", body)
+    parts = "".join(
+        f'<div lang="{l["code"]}" dir="{l["dir"]}" style="margin-bottom:24px"><h1>{t(l["code"], "nf_title")}</h1>'
+        f'<p class="lead">{t(l["code"], "nf_lead")} <a href="{L(l["code"], "/")}">{t(l["code"], "nf_home")}</a></p></div>'
+        for l in LANGS)
+    body = f'<section class="page-head"><div class="wrap"><p class="eyebrow">404</p>{parts}</div></section>'
+    page(DEFAULT, "/404", t(DEFAULT, "nf_title"), t(DEFAULT, "nf_lead"), body)
 
-# ---------- Copy existing app privacy policies, adding a link back to the site
+# ----------------------------------------------- app privacy policies (as-is)
 def copy_policy(slug, src):
-    with open(os.path.join(SRC, src), encoding="utf-8") as f:
+    with open(os.path.join(ROOT, src), encoding="utf-8") as f:
         h = f.read()
     back = ('<div style="max-width:850px;margin:0 auto 16px;font:500 14px/1.4 -apple-system,Segoe UI,Roboto,sans-serif">'
             '<a href="/" style="color:inherit;opacity:.75;text-decoration:none">← Division 11 Studios</a></div>')
-    h = re.sub(r"(<body[^>]*>)", r"\1\n" + back.replace("\\", "\\\\"), h, count=1)
-    h = h.replace("</head>", '<link rel="canonical" href="https://www.division11studios.com/%s/privacy/">\n<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">\n</head>' % slug, 1)
+    h = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + back, h, count=1)
+    h = h.replace("</head>", f'<link rel="canonical" href="{SITE}/{slug}/privacy/">\n<link rel="icon" href="/favicon.ico" sizes="any">\n</head>', 1)
     d = os.path.join(OUT, slug, "privacy")
     os.makedirs(d, exist_ok=True)
     with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
         f.write(h)
 
 def statics():
-    a = os.path.join(OUT, "assets"); os.makedirs(a, exist_ok=True)
-    shutil.copy(os.path.join(SRC, "site.css"), os.path.join(a, "site.css"))
-    B = os.path.join(SRC, "brand")
-    for f in ["D11_Full_Logo_Color_On_Light.svg","D11_Full_Logo_Color_On_Dark.svg"]:
+    a = os.path.join(OUT, "assets")
+    os.makedirs(os.path.join(a, "apps"), exist_ok=True)
+    B = os.path.join(ROOT, "brand")
+    shutil.copy(os.path.join(ROOT, "site.css"), os.path.join(a, "site.css"))
+    for f in ["D11_Full_Logo_Color_On_Light.svg", "D11_Full_Logo_Color_On_Dark.svg",
+              "D11_Pattern_Black_Background.webp", "apple-touch-icon.png"]:
         shutil.copy(os.path.join(B, f), os.path.join(a, f))
     shutil.copy(os.path.join(B, "D11_Logomark_Blue_White_Primary.svg"), os.path.join(a, "favicon.svg"))
-    shutil.copy(os.path.join(SRC, "app-ads.txt"), os.path.join(OUT, "app-ads.txt"))
+    shutil.copy(os.path.join(B, "favicon.ico"), os.path.join(OUT, "favicon.ico"))
+    for f in os.listdir(os.path.join(B, "apps")):
+        shutil.copy(os.path.join(B, "apps", f), os.path.join(a, "apps", f))
+    shutil.copy(os.path.join(ROOT, "app-ads.txt"), os.path.join(OUT, "app-ads.txt"))
     with open(os.path.join(OUT, "CNAME"), "w") as f: f.write("www.division11studios.com\n")
     with open(os.path.join(OUT, ".nojekyll"), "w") as f: f.write("")
     with open(os.path.join(OUT, "robots.txt"), "w") as f:
-        f.write("User-agent: *\nAllow: /\nSitemap: https://www.division11studios.com/sitemap.xml\n")
-    urls = ["/", "/apps/", "/about/", "/support/", "/terms/", "/privacy/"] + [f"/{x['slug']}/" for x in APPS] + [f"/{x['slug']}/privacy/" for x in APPS]
+        f.write(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
+    urls = [L(lang, p) for lang, p in PAGES] + [f"/{x['slug']}/privacy/" for x in APPS]
     with open(os.path.join(OUT, "sitemap.xml"), "w") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
-        for u in urls: f.write(f"  <url><loc>https://www.division11studios.com{u}</loc></url>\n")
+        for u in urls:
+            f.write(f"  <url><loc>{SITE}{u}</loc></url>\n")
         f.write("</urlset>\n")
 
 if __name__ == "__main__":
-    shutil.rmtree(OUT, ignore_errors=True); os.makedirs(OUT)
-    home(); apps_page(); about(); support(); terms(); privacy(); notfound()
-    for x in APPS: app_page(x)
+    shutil.rmtree(OUT, ignore_errors=True)
+    os.makedirs(OUT)
+    for l in LANGS:
+        c = l["code"]
+        home(c); apps_page(c); about(c); support(c); terms(c); privacy(c)
+        for x in APPS:
+            app_page(c, x)
+    notfound()
     copy_policy("scorey", "policies/scorey.html")
     copy_policy("artnest", "policies/artnest.html")
     statics()

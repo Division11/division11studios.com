@@ -4,7 +4,10 @@ Official website of **Division 11 Studios** (Division Eleven Studios – Custom 
 
 ## How it works
 
-- `build.py` generates every page into `_site/` (Python 3, no dependencies). Company details and app listings live in the `CO` and `APPS` data at the top.
+- `build.py` generates every page into `_site/` (Python 3, no dependencies). All visible text lives in the `T` (site) and `APPS` (per-app) tables, keyed by language.
+- Languages: English at `/`, Arabic at `/ar/`. To add one, add it to `LANGS` and give it a block in `T` and in each app's `text`; missing strings fall back to English.
+- Light and dark themes follow the visitor's system setting, with a toggle in the header (system → light → dark).
+- App icons live in `brand/apps/`.
 - `site.css` is the shared stylesheet (the brand pattern is embedded in it).
 - `brand/` holds the approved D11 logo SVGs; `policies/` holds each app's privacy policy, published at `/<app>/privacy/`.
 - `app-ads.txt` is published at the site root for AdMob / LevelPlay seller verification.
