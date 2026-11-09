@@ -727,6 +727,23 @@ def policy_page(lang, app, blocks):
 <section class="section legal-wrap pull-up"><div class="wrap narrow">{note}<div class="paper prose policy" lang="{code}" dir="{d['dir']}">{body}</div></div></section>"""
     page(lang, f"/{app['slug']}/privacy/", title, f"{title} — {t(lang, 'brand')}", body, active="/apps/", hero=True)
 
+# Old Google Sites addresses forward to their new pages (GitHub Pages can't
+# send server redirects, so each one is a tiny page that forwards instantly).
+REDIRECTS = {"/home/": "/", "/app-gallery/": "/apps/", "/appGallery/": "/apps/"}
+
+def redirects():
+    for src, dst in REDIRECTS.items():
+        url = SITE + dst
+        html = (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Redirecting…</title>'
+                f'<link rel="canonical" href="{url}"><meta name="robots" content="noindex">'
+                f'<meta http-equiv="refresh" content="0; url={dst}">'
+                f'<script>location.replace("{dst}"+location.search+location.hash)</script></head>'
+                f'<body><p>This page has moved to <a href="{dst}">{url}</a>.</p></body></html>')
+        d = os.path.join(OUT, src.strip("/"))
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
+            f.write(html)
+
 def statics():
     a = os.path.join(OUT, "assets")
     os.makedirs(os.path.join(a, "apps"), exist_ok=True)
@@ -765,4 +782,5 @@ if __name__ == "__main__":
         for l in LANGS:
             policy_page(l["code"], x, blocks)
     statics()
+    redirects()
     print("built", sum(len(fs) for _, _, fs in os.walk(OUT)), "files")
