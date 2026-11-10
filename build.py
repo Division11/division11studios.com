@@ -29,6 +29,7 @@ LANGS = [
 DEFAULT = "en"
 
 CO = {
+    "cr": "552091",  # Kuwait commercial registration no. — MOCI requires it next to the company name
     "phone": "+965 9008 5898",
     "phone_href": "+96590085898",
     "support": "support@division11studios.com",
@@ -49,6 +50,7 @@ T = {
     "theme": "Switch theme (system, light, dark)",
     "tagline_footer": "Mobile apps and games, designed and built in Kuwait.",
     "f_company": "Company", "f_address": "Address", "f_contact": "Contact",
+    "cr_label": "Commercial Registration No.",
     "privacy": "Privacy", "terms": "Terms",
     "rights": "All rights reserved.",
     "ios_small": "Download on the", "ios_big": "App Store",
@@ -143,6 +145,7 @@ T = {
     "theme": "تبديل المظهر (النظام، فاتح، داكن)",
     "tagline_footer": "تطبيقات وألعاب للأجهزة المحمولة، صُممت وطُوّرت في الكويت.",
     "f_company": "الشركة", "f_address": "العنوان", "f_contact": "التواصل",
+    "cr_label": "رقم السجل التجاري",
     "privacy": "الخصوصية", "terms": "الشروط",
     "rights": "جميع الحقوق محفوظة.",
     "arrow": "←",
@@ -413,6 +416,7 @@ def page(lang, path, title, desc, body, active=None, hero=False):
           "alternateName": T["ar"]["brand"], "legalName": T["en"]["legal"], "url": SITE,
           "logo": SITE + "/assets/apple-touch-icon.png", "email": CO["support"], "telephone": CO["phone_href"],
           "foundingDate": "2026",
+          "identifier": {"@type": "PropertyValue", "propertyID": "Kuwait Commercial Registration", "value": CO["cr"]},
           "address": {"@type": "PostalAddress", "streetAddress": "Building 9, Street 133, Block 1",
                       "addressLocality": "Al Nahda, Kuwait City", "addressCountry": "KW"},
           "sameAs": [CO["instagram"], CO["tiktok"]]}
@@ -471,7 +475,7 @@ def page(lang, path, title, desc, body, active=None, hero=False):
     </div>
     <div>
       <h3>{t(lang, 'f_company')}</h3>
-      <p class="small">{esc(t(lang, 'legal'))}</p>
+      <p class="small">{esc(t(lang, 'legal'))}<br>{t(lang, 'cr_label')} {ltr(CO['cr'])}</p>
     </div>
     <div>
       <h3>{t(lang, 'f_address')}</h3>
@@ -483,7 +487,7 @@ def page(lang, path, title, desc, body, active=None, hero=False):
       <p class="small"><a href="{L(lang, '/privacy/')}">{t(lang, 'privacy')}</a> · <a href="{L(lang, '/terms/')}">{t(lang, 'terms')}</a></p>
     </div>
   </div>
-  <div class="wrap legal-line small">© 2026 {esc(t(lang, 'legal').rstrip('.'))}. {t(lang, 'rights')} {esc(t(lang, 'legal_note'))}</div>
+  <div class="wrap legal-line small">© 2026 {esc(t(lang, 'legal').rstrip('.'))} · {t(lang, 'cr_label')} {ltr(CO['cr'])}. {t(lang, 'rights')} {esc(t(lang, 'legal_note'))}</div>
 </footer>
 <script>{THEME_TOGGLE}</script>
 </body>
