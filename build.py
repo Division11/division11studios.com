@@ -36,6 +36,7 @@ CO = {
     "dev": "dev@division11studios.com",
     "instagram": "https://www.instagram.com/division11studios/",
     "tiktok": "https://www.tiktok.com/@division11studios",
+    "facebook": "https://www.facebook.com/division11studios",
 }
 
 # ---------------------------------------------------------------- site strings
@@ -419,7 +420,7 @@ def page(lang, path, title, desc, body, active=None, hero=False):
           "identifier": {"@type": "PropertyValue", "propertyID": "Kuwait Commercial Registration", "value": CO["cr"]},
           "address": {"@type": "PostalAddress", "streetAddress": "Building 9, Street 133, Block 1",
                       "addressLocality": "Al Nahda, Kuwait City", "addressCountry": "KW"},
-          "sameAs": [CO["instagram"], CO["tiktok"]]}
+          "sameAs": [CO["instagram"], CO["tiktok"], CO["facebook"]]}
     fonts = "family=Inter:wght@400;500;600&family=Sora:wght@500;600;700"
     if lang == "ar":
         fonts += "&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700"
@@ -471,7 +472,7 @@ def page(lang, path, title, desc, body, active=None, hero=False):
     <div>
       <div class="foot-brand">{logos()}</div>
       <p class="muted small">{t(lang, 'tagline_footer')}</p>
-      <p class="small"><a href="{CO['instagram']}" rel="noopener">Instagram</a> · <a href="{CO['tiktok']}" rel="noopener">TikTok</a></p>
+      <p class="small"><a href="{CO['instagram']}" rel="noopener">Instagram</a> · <a href="{CO['tiktok']}" rel="noopener">TikTok</a> · <a href="{CO['facebook']}" rel="noopener">Facebook</a></p>
     </div>
     <div>
       <h3>{t(lang, 'f_company')}</h3>
